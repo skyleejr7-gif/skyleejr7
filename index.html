@@ -84,37 +84,46 @@
 <header>
   <div class="wrap" style="padding:0;">
     <h1>국민기초생활수급자 · 차상위계층 · 한부모가족 판정 프로그램</h1>
-    <p>소득·재산·금융재산·자동차 정보를 입력하면 소득인정액을 계산하여 급여별 수급자격을 판정합니다. (2026년 기준)</p>
+    <p>소득·재산·금융재산·자동차 정보를 입력하면 소득인정액을 계산하여 급여별 수급자격을 판정합니다. (2026년·2027년 기준 중위소득 반영)</p>
   </div>
 </header>
 
 <div class="wrap">
 
   <div class="note">
-    <b>안내</b> 이 프로그램은 국민기초생활보장법·한부모가족지원법상 공개된 기준에 따라 <b>소득인정액을 추정</b>하는 참고용 도구입니다.
-    부양의무자 조사(의료급여), 실거주 확인, 재산의 세부 유형 판정 등은 관할 <b>읍·면·동 주민센터 / 시·군·구청</b> 사회복지 담당자의
-    공적 조사(사회보장정보시스템)를 통해 최종 결정됩니다. 실제 신청 전 반드시 담당 부서에 확인하시기 바랍니다.
-    모든 기준금액은 하단 <b>"기준값 설정"</b>에서 연도별 고시값으로 수정할 수 있습니다.
+    <b>안내</b> 이 프로그램은 「국민기초생활보장법」·「한부모가족지원법」 및 <b>2026년 국민기초생활보장 사업안내</b>의 공개 기준에 따라
+    <b>소득인정액을 추정</b>하는 참고용 도구입니다. 부양의무자 조사(의료급여), 실거주 확인, 재산의 세부 유형 판정, 자동차 보유 한도 심의 등은
+    관할 <b>읍·면·동 주민센터 / 시·군·구청</b> 사회복지 담당자의 공적 조사(사회보장정보시스템)를 통해 최종 결정됩니다.
+    모든 기준금액은 하단 <b>"기준값 설정"</b>에서 수정할 수 있습니다.
   </div>
 
   <!-- 가구 정보 -->
   <div class="card">
     <h2>① 가구 정보</h2>
-    <p class="sub">가구원 수와 거주 지역(재산 기본공제액 산정 기준)을 입력하세요.</p>
+    <p class="sub">적용 연도와 가구원 수, 거주 지역(기본재산액·주거용재산 한도액 산정 기준)을 입력하세요.</p>
     <div class="grid">
+      <div class="field">
+        <label>적용 연도</label>
+        <select id="baseYear" onchange="onYearChange()">
+          <option value="2026" selected>2026년 (현행)</option>
+          <option value="2027">2027년 (2027.1.1. 시행)</option>
+        </select>
+        <div class="hint">2027년 기준 중위소득은 2026.7.28. 제80차 중앙생활보장위원회 의결값입니다.</div>
+      </div>
       <div class="field">
         <label>가구원 수</label>
         <input type="number" id="hhSize" min="1" max="12" value="3">
         <div class="hint">본인 포함 실제 함께 거주·생계를 같이하는 가구원 수</div>
       </div>
       <div class="field">
-        <label>거주 지역 (재산 기본공제 구간)</label>
-        <select id="region">
+        <label>거주 지역</label>
+        <select id="region" onchange="syncRegionHint()">
           <option value="seoul">서울특별시</option>
           <option value="gyeonggi">경기도</option>
           <option value="metro" selected>광역시 · 세종시 · 창원시</option>
           <option value="other">그 외 지역 (도 단위 등)</option>
         </select>
+        <div class="hint" id="regionHint"></div>
       </div>
     </div>
   </div>
@@ -122,7 +131,7 @@
   <!-- 소득 정보 -->
   <div class="card">
     <h2>② 소득 정보</h2>
-    <p class="sub">가구 전체의 월 소득을 입력하세요. 근로소득은 가구원별로 나누어 입력하면 청년·대학생 등 공제가 정확히 반영됩니다.</p>
+    <p class="sub">근로·사업소득은 가구원별로 나누어 입력해야 공제 특례가 정확히 반영됩니다. 공제 항목이 둘 이상 해당하면 가장 유리한 하나만 적용합니다.</p>
 
     <h3 class="mini">근로·사업소득자 (가구원별)</h3>
     <div id="incomeRows"></div>
@@ -149,26 +158,23 @@
       </div>
     </div>
 
-    <details style="margin-top:14px;border:none;background:none;">
-      <summary style="padding:8px 0;font-size:13px;">부양의무자 관련 (의료급여 참고용)</summary>
-      <div class="inner" style="padding:0;">
-        <label class="chk"><input type="checkbox" id="dutyHasCapacity"> 부양의무자(1촌 직계혈족 및 배우자 등)가 있고, 부양능력 '충분' 판정 가능성이 있음</label>
-        <div class="hint">생계·주거·교육급여는 부양의무자 기준이 폐지되었으나, <b>의료급여</b>는 여전히 부양의무자 기준이 적용됩니다(중증장애인 등 일부 예외). 체크 시 의료급여 결과에 별도 안내가 표시됩니다.</div>
-      </div>
-    </details>
+    <div class="hint" style="margin-top:14px;">
+      생계·주거·교육급여는 부양의무자 기준이 적용되지 않습니다. <b>의료급여</b>는 부양의무자 기준이 유지되므로 아래 ⑤에서 별도로 판정하세요.
+    </div>
   </div>
 
   <!-- 재산 정보 -->
   <div class="card">
     <h2>③ 일반재산 · 금융재산</h2>
-    <p class="sub">시가표준액(공시가격) 및 잔액 기준으로 입력하세요. 부채는 대출원금 등 공제 가능한 부채 총액입니다.</p>
+    <p class="sub">시가표준액(공시가격)·보증금·잔액 기준으로 입력하세요. 주거용재산은 지역별 한도액까지만 주거용으로 인정되고, 초과분은 일반재산으로 산정됩니다.</p>
     <div class="grid">
       <div class="field">
-        <label>주거용 재산 (자가 주택 공시가격 / 전세·임차보증금)</label>
+        <label>주거용 재산 (거주 중인 주택 공시가격 / 임차보증금)</label>
         <input type="number" id="housingProperty" min="0" value="0">
+        <div class="hint">해당 주택에 실제 거주하지 않으면 일반재산으로 입력하세요. 임차보증금은 적용률 0.95를 곱한 금액입니다.</div>
       </div>
       <div class="field">
-        <label>일반재산 (토지·건축물 등, 주거용 제외)</label>
+        <label>일반재산 (토지·건축물·비거주 주택 등)</label>
         <input type="number" id="generalProperty" min="0" value="0">
       </div>
       <div class="field">
@@ -176,8 +182,9 @@
         <input type="number" id="financialProperty" min="0" value="0">
       </div>
       <div class="field">
-        <label>부채 (공제 가능 부채 총액)</label>
+        <label>부채 (차감 대상 부채 총액)</label>
         <input type="number" id="debt" min="0" value="0">
+        <div class="hint">금융회사 대출금, 임대보증금 부채, 법원에 의해 확인된 사채 등</div>
       </div>
     </div>
   </div>
@@ -185,9 +192,31 @@
   <!-- 자동차 정보 -->
   <div class="card">
     <h2>④ 자동차 재산</h2>
-    <p class="sub">보유 차량을 한 대씩 등록하세요. 생업용·중증장애인 이동수단·국가유공자(상이1~3급) 이동수단은 각 유형당 1대에 한해 재산산정에서 제외됩니다.</p>
+    <p class="sub">차량을 한 대씩 등록하세요. 차종·배기량·차령·용도에 따라 <b>재산산정 제외 / 일반재산 환산율(4.17%) / 원칙(월 100%)</b>으로 자동 분류합니다.</p>
     <div id="vehicleRows"></div>
     <div class="actions"><button class="btn-add" onclick="addVehicleRow()">+ 차량 추가</button></div>
+    <div class="hint" style="margin-top:10px;">
+      보유 한도: 일반가구는 생업용 1대와 일반재산 환산율 적용 자동차 1대, 장애인가구는 장애인사용자동차 1대와 그 외 1대까지 인정되며,
+      한도를 초과한 차량은 월 100%가 적용됩니다(압류·멸실·불법명의·처분예정 차량은 한도 제외).
+    </div>
+  </div>
+
+  <!-- 부양의무자 -->
+  <div class="card">
+    <h2>⑤ 부양의무자 (의료급여 판정용)</h2>
+    <p class="sub">의료급여는 부양의무자 기준이 유지됩니다. 부양의무자 가구를 하나씩 등록하면 소득기준과 재산기준을 함께 판정합니다.</p>
+
+    <label class="chk"><input type="checkbox" id="dutyEnable" checked> 부양의무자 판정 포함</label>
+    <div class="hint" style="margin:6px 0 14px;">
+      부양의무자는 1촌의 직계혈족(부모·자녀) 및 그 배우자입니다. <b>한 명이라도 부양능력이 있으면 의료급여 수급자에서 제외</b>됩니다.
+      수급(권)자가 30세 미만 한부모·자립준비청년이거나 부양의무자가 기초연금 수급자·중증장애인인 경우 등은 부양의무자 기준이 적용되지 않으므로 등록하지 마십시오.
+    </div>
+
+    <label class="chk"><input type="checkbox" id="dutyVulnerable"> 수급(권)자 가구가 노인·장애인·한부모 등 취약계층 (완화된 소득기준 적용)</label>
+    <div class="hint" style="margin:6px 0 14px;">완화 적용 시 소득기준은 (A×40%)+(B×100%)와 (A+B)×74% 중 더 높은 값을 적용합니다.</div>
+
+    <div id="dutyRows"></div>
+    <div class="actions"><button class="btn-add" onclick="addDutyRow()">+ 부양의무자 가구 추가</button></div>
   </div>
 
   <button class="btn-primary" onclick="calculate()">판정 결과 계산하기</button>
@@ -208,29 +237,45 @@
       </div>
       <div class="kv"><span class="k">소득평가액 (근로소득공제·가구특성 지출비용 반영 후)</span><span class="v" id="outIncomeEval">0원</span></div>
       <div class="kv"><span class="k">재산의 소득환산액</span><span class="v" id="outPropConv">0원</span></div>
-      <div class="breakdown" id="breakdownDetail"></div>
     </div>
 
     <div class="card">
-      <h2>급여별 · 제도별 판정표</h2>
-      <p class="sub">가구원 <span id="szEcho"></span>인 기준 중위소득 대비 선정기준입니다.</p>
-      <div style="overflow-x:auto;">
-      <table class="result-table" id="resultTable">
-        <thead><tr><th>구분</th><th>선정기준 (중위소득 대비)</th><th>기준금액</th><th>판정</th><th>기준 대비 여유/초과</th></tr></thead>
-        <tbody></tbody>
-      </table>
+      <h2>급여·제도별 판정</h2>
+      <p class="sub"><span id="yearEcho"></span>년 기준, 가구원 <span id="szEcho"></span>인 기준 중위소득 대비 선정기준입니다.</p>
+      <div class="tablewrap">
+        <table id="resultTable">
+          <thead><tr><th>구분</th><th>선정기준 (중위소득 대비)</th><th>기준금액</th><th>판정</th><th>기준 대비 여유/초과</th></tr></thead>
+          <tbody></tbody>
+        </table>
       </div>
-      <div class="warnBox" id="dutyWarn" style="display:none;"></div>
+      <div id="dutyWarn" class="note" style="display:none;margin-top:14px;"></div>
+      <div id="vehicleWarn" class="note" style="display:none;margin-top:10px;"></div>
+    </div>
+
+    <div class="card" id="dutyCard" style="display:none;">
+      <h2>부양의무자 부양능력 판정 (의료급여)</h2>
+      <div class="tablewrap">
+        <table id="dutyTable">
+          <thead><tr><th>부양의무자 가구</th><th>부양능력 판정소득액</th><th>소득기준</th><th>재산의 소득환산액</th><th>재산기준</th><th>판정</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div id="dutyDetail" class="breakdown" style="margin-top:14px;"></div>
+    </div>
+
+    <div class="card">
+      <h2>산정 내역</h2>
+      <div id="breakdownDetail" class="breakdown"></div>
     </div>
   </div>
 
   <!-- 기준값 설정 -->
-  <details id="settingsPanel">
-    <summary>기준값 설정 (2026년 고시 기준 · 연도 변경 시 직접 수정)</summary>
+  <details>
+    <summary>기준값 설정 (연도가 바뀌면 이 값만 수정하면 계속 사용할 수 있습니다)</summary>
     <div class="inner">
-      <h3 class="mini">기준 중위소득 (원/월)</h3>
+      <h3 class="mini">기준 중위소득 (원/월) — <span id="medianYearEcho">2026</span>년</h3>
       <div class="grid" id="medianGrid"></div>
-      <div class="hint" style="margin-top:6px;">7인 이상은 "6인 기준액 + (6인기준액-5인기준액) × 초과인원"으로 자동 계산되는 추정값입니다. 정부 고시 확정치가 있으면 아래 표를 직접 수정하세요.</div>
+      <div class="hint">7인 이상 가구는 6인 가구 금액에 5인·6인 차액을 가산하여 추정합니다. 고시상 7인 가구 금액과 다를 수 있으므로 실제 판정 시에는 고시값을 확인하시기 바랍니다.</div>
 
       <h3 class="mini">급여·제도별 선정기준 비율 (기준 중위소득 대비, %)</h3>
       <div class="grid">
@@ -243,12 +288,20 @@
         <div class="field"><label>청소년한부모(24세 이하)·조손가족</label><input type="number" id="rYouthSingleParent" value="65" step="0.1"></div>
       </div>
 
-      <h3 class="mini">재산 기본공제액 (지역별, 원)</h3>
+      <h3 class="mini">기본재산액 (지역별, 원) — 생계·의료·주거·교육급여 공통</h3>
       <div class="grid">
         <div class="field"><label>서울특별시</label><input type="number" id="dedSeoul" value="99000000"></div>
         <div class="field"><label>경기도</label><input type="number" id="dedGyeonggi" value="80000000"></div>
         <div class="field"><label>광역시·세종·창원시</label><input type="number" id="dedMetro" value="77000000"></div>
         <div class="field"><label>그 외 지역</label><input type="number" id="dedOther" value="53000000"></div>
+      </div>
+
+      <h3 class="mini">주거용재산 한도액 (지역별, 원)</h3>
+      <div class="grid">
+        <div class="field"><label>서울특별시</label><input type="number" id="capSeoul" value="172000000"></div>
+        <div class="field"><label>경기도</label><input type="number" id="capGyeonggi" value="151000000"></div>
+        <div class="field"><label>광역시·세종·창원시</label><input type="number" id="capMetro" value="146000000"></div>
+        <div class="field"><label>그 외 지역</label><input type="number" id="capOther" value="112000000"></div>
       </div>
 
       <h3 class="mini">재산 종류별 월 소득환산율 (%)</h3>
@@ -257,47 +310,106 @@
         <div class="field"><label>일반재산</label><input type="number" id="rateGeneral" value="4.17" step="0.01"></div>
         <div class="field"><label>금융재산</label><input type="number" id="rateFinancial" value="6.26" step="0.01"></div>
         <div class="field"><label>자동차 (원칙)</label><input type="number" id="rateCar" value="100" step="0.01"></div>
-        <div class="field"><label>자동차 완화율 (2000cc미만·500만원미만 등)</label><input type="number" id="rateCarReduced" value="4.17" step="0.01"></div>
       </div>
 
       <h3 class="mini">기타 공제</h3>
       <div class="grid">
-        <div class="field"><label>금융재산 기본공제액 (원)</label><input type="number" id="finBasicDeduction" value="5000000"></div>
+        <div class="field"><label>금융재산 생활준비금 공제 (원)</label><input type="number" id="finBasicDeduction" value="5000000"></div>
         <div class="field"><label>근로소득 기본공제율 (%)</label><input type="number" id="laborBaseRate" value="30" step="0.1"></div>
-        <div class="field"><label>대학생 정액공제 (원)</label><input type="number" id="studentFlat" value="400000"></div>
-        <div class="field"><label>청년(19~34세)·청소년한부모 정액공제 (원)</label><input type="number" id="youthFlat" value="600000"></div>
+        <div class="field"><label>34세 이하·대학생 정액공제 (원)</label><input type="number" id="youthFlat" value="600000"></div>
+        <div class="field"><label>노인·장애인 등 정액공제 (원)</label><input type="number" id="seniorFlat" value="200000"></div>
+        <div class="field"><label>직업재활사업 참여소득 추가공제율 (%)</label><input type="number" id="rehabRate" value="50" step="0.1"></div>
       </div>
+      <h3 class="mini">부양의무자 기본재산액 (지역별, 원)</h3>
+      <div class="grid">
+        <div class="field"><label>서울특별시</label><input type="number" id="dDedSeoul" value="364000000"></div>
+        <div class="field"><label>경기도</label><input type="number" id="dDedGyeonggi" value="294000000"></div>
+        <div class="field"><label>광역시·세종·창원시</label><input type="number" id="dDedMetro" value="283000000"></div>
+        <div class="field"><label>그 외 지역</label><input type="number" id="dDedOther" value="195000000"></div>
+      </div>
+
+      <h3 class="mini">부양의무자 판정 기준</h3>
+      <div class="grid">
+        <div class="field"><label>주거용재산 환산율 (%)</label><input type="number" id="dRateHousing" value="1.04" step="0.01"></div>
+        <div class="field"><label>일반·금융·자동차 환산율 (%)</label><input type="number" id="dRateGeneral" value="2.08" step="0.01"></div>
+        <div class="field"><label>소득기준 A 비율 (%)</label><input type="number" id="dRateA" value="40" step="0.1"></div>
+        <div class="field"><label>소득기준 B 비율 (%)</label><input type="number" id="dRateB" value="100" step="0.1"></div>
+        <div class="field"><label>취약계층 완화 비율 (A+B의 %)</label><input type="number" id="dRateSoft" value="74" step="0.1"></div>
+        <div class="field"><label>재산기준 비율 (A+B의 %)</label><input type="number" id="dRateProp" value="18" step="0.1"></div>
+      </div>
+
       <div class="actions" style="margin-top:14px;"><button class="btn-ghost" onclick="resetSettings()">기준값 기본값으로 재설정</button></div>
     </div>
   </details>
 
+  <!-- 산식 설명 -->
   <details>
-    <summary>계산 방법 및 산정 순서 안내</summary>
-    <div class="inner" style="font-size:12.5px;color:var(--muted);">
-      <p><b>1. 소득평가액</b> = 실제소득 합계 − 근로소득공제 − 가구특성별 지출비용<br>
-      · 근로소득공제: 가구원별로 (기본 30%) 또는 (정액공제 후 나머지의 30% 추가공제, 대학생·청년/청소년한부모)를 적용<br>
-      · 사업·재산·이전소득은 원칙적으로 공제 없이 전액 반영</p>
-      <p><b>2. 재산의 소득환산액</b><br>
-      · 부채는 일반재산 → 주거용재산 → 금융재산(기본공제 후) 순서로 우선 차감<br>
-      · 지역별 재산 기본공제액은 주거용재산 → 일반재산 → 금융재산 순서로 차감<br>
-      · 남은 금액에 재산 종류별 소득환산율(주거용 1.04%, 일반 4.17%, 금융 6.26%)을 곱하여 합산<br>
-      · 자동차는 기본공제 없이 차량가액 전액에 환산율(원칙 100%, 완화 대상 4.17%, 제외 대상 0%)을 곱하여 합산</p>
-      <p><b>3. 소득인정액</b> = 소득평가액 + 재산의 소득환산액</p>
-      <p><b>4. 판정</b> = 소득인정액 ≤ (가구원수별 기준 중위소득 × 급여·제도별 선정기준 비율)</p>
-      <p style="margin-top:10px;">※ 실제 조사에서는 재산의 종류(임차보증금·분양권 등 세부 항목), 재진입 특례, 자동차 다자녀 특례의 소득요건, 의료급여 부양의무자의 소득·재산 등 추가 변수가 반영됩니다. 이 도구는 대표적인 산식을 단순화하여 제공하는 추정 계산기입니다.</p>
+    <summary>소득인정액 산식 및 적용 기준</summary>
+    <div class="inner">
+      <p><b>소득인정액 = 소득평가액 + 재산의 소득환산액</b></p>
+
+      <p><b>1. 소득평가액</b> = 실제소득 − 근로·사업소득 공제 − 가구특성별 지출비용<br>
+      · 기본 30% 공제, 아래 항목은 정액공제 후 나머지 금액에 추가공제율 적용<br>
+      · 34세 이하 수급(권)자 및 대학생: 60만원 공제 후 나머지 30% 추가공제<br>
+      · 65세 이상 노인, 등록장애인, 북한이탈주민: 20만원 공제 후 나머지 30% 추가공제<br>
+      · 35세 이상 초·중·고등학생: 20만원 공제 후 나머지 30% 추가공제<br>
+      · 등록장애인의 장애인·정신질환자 직업재활사업 참여소득: 20만원 공제 후 나머지 50% 추가공제<br>
+      · 임신 중·분만 후 6개월 미만 여성, 사회복무요원·상근예비역, 행정인턴: 30% 공제<br>
+      · 재산소득·이전소득은 근로소득 공제 대상이 아님</p>
+
+      <p><b>2. 재산의 소득환산액</b> = {(재산의 종류별 가액 − 기본재산액 − 부채)} × 재산의 종류별 소득환산율<br>
+      · 주거용재산은 지역별 한도액까지만 인정하고, 초과분은 일반재산으로 산정<br>
+      · 금융재산에서 생활준비금 500만원 우선 공제<br>
+      · 부채 차감 순서: 1순위 주거용재산 → 2순위 일반재산(일반재산 환산율이 적용되는 자동차 포함) → 3순위 금융재산<br>
+      · 기본재산액 공제 순서: 주거용재산 → 일반재산 → 금융재산<br>
+      · 월 100% 환산율이 적용되는 자동차의 가액에서는 기본재산액과 부채를 차감하지 않음<br>
+      · 환산 결과가 음수이면 0원으로 처리</p>
+
+      <p><b>3. 자동차</b><br>
+      · 재산산정 제외: 중증 등록장애인·국가유공자 상이 1~3급 수급(권)자 본인의 이동수단(2,000cc 미만) 가구별 1대, 생업용 자동차 가구별 1대<br>
+      · 일반재산 환산율(4.17%) 적용: 2,000cc 미만 승용차로서 차령 10년 이상 또는 차량가액 500만원 미만인 자동차,
+        거동이 곤란한 가구원의 병원치료 목적으로 소유가 불가피한 2,000cc 미만 승용차,
+        가구원 6인 이상 또는 18세 미만 자녀 2명 이상 가구의 2,500cc 미만 7인승 이상 자동차로서 차령 10년 이상 또는 500만원 미만,
+        소형 이하 승합·화물자동차로서 차령 10년 이상 또는 500만원 미만, 260cc 이하 이륜자동차,
+        압류 등으로 운행이 불가능하거나 처분 예정인 자동차<br>
+      · 그 밖의 자동차는 월 100% 적용</p>
+
+      <p><b>4. 판정</b> = 소득인정액 ≤ (가구원 수별 기준 중위소득 × 급여·제도별 선정기준 비율)</p>
+      <p><b>5. 부양의무자 부양능력 판정 (의료급여)</b><br>
+      · A = 수급(권)자 가구의 기준 중위소득, B = 부양의무자 가구의 기준 중위소득<br>
+      · 부양능력 없음: 소득기준과 재산기준을 <b>동시에</b> 충족 — 부양능력 판정소득액 &lt; (A×40%)+(B×100%) 이고, 재산의 소득환산액 &lt; (A+B)×18%<br>
+      · 부양능력 있음: 소득기준·재산기준 중 <b>하나만 초과해도</b> 있음으로 판정<br>
+      · 수급(권)자가 노인·장애인·한부모 등 취약계층이면 소득기준은 (A×40%)+(B×100%)와 (A+B)×74% 중 더 높은 값을 적용<br>
+      · 부양의무자 기본재산액: 서울 3억6,400만원, 경기 2억9,400만원, 광역·세종·창원 2억8,300만원, 그 외 1억9,500만원<br>
+      · 부양의무자 재산의 소득환산율: 주거용재산 월 1.04%, 일반재산·금융재산·자동차·기타 산정되는 재산 월 2.08%<br>
+      · 부양의무자가 장애의 정도가 심한 등록장애인(상이등급 1~3급 포함)인 경우 본인 명의 장애인사용자동차 1대는 재산가액 산정에서 제외하고, 그 밖의 자동차는 일반재산 환산율 적용<br>
+      · 금융재산에서 생활준비금 500만원 공제(장기저축은 미적용), 부채 차감은 수급(권)자와 동일<br>
+      · 부양의무자가 한 명이라도 부양능력이 있으면 의료급여 수급자에서 제외</p>
+
+
+      <p style="margin-top:10px;">※ 실제 조사에서는 재산의 세부 항목(분양권·조합원입주권 등), 재산범위 특례, 근로능력 판정,
+      의료급여 부양의무자의 소득·재산, 자동차 보유 한도에 대한 지방생활보장위원회 심의 등 추가 변수가 반영됩니다.
+      이 도구는 대표적인 산식을 반영한 추정 계산기입니다.</p>
     </div>
   </details>
 
 </div>
 
 <footer>
-  <p><b>참고 자료(2026년 기준)</b>: 보건복지부 2026년도 기준 중위소득 및 급여별 선정기준 고시, 국민기초생활보장사업안내, 한부모가족지원사업안내, 찾기쉬운 생활법령정보(easylaw.go.kr) 등 공개 자료를 종합하였습니다. 매년 8월경 익년도 기준 중위소득이 고시되므로, 최신 수치는 보건복지부(www.mohw.go.kr) 및 관할 행정복지센터를 통해 재확인하시기 바랍니다.</p>
+  <p><b>근거 자료</b> 보건복지부 「2026년도 기준 중위소득 및 생계·의료·주거·교육급여 선정기준과 최저보장수준」 고시,
+  보건복지부 「2026년 국민기초생활보장 사업안내」(근로소득공제 105~106쪽, 주거용재산 한도액 134쪽, 자동차 152~155쪽, 부채 차감 164쪽, 기본재산액 165쪽, 부양의무자 재산의 소득환산제 194쪽, 부양능력 판정 기본개념 196쪽),
+  여성가족부 「2026년 한부모가족지원사업 안내」, 보건복지부 보도자료(2026.7.28. 제80차 중앙생활보장위원회, 2027년도 기준 중위소득 6.70% 인상).</p>
+  <p>2027년 기준 중위소득은 관보 고시를 거쳐 2027년 1월 1일부터 적용됩니다. 급여별 선정기준 비율은 2026년과 동일합니다.
+  최신 수치는 보건복지부(www.mohw.go.kr) 및 관할 행정복지센터를 통해 확인하시기 바랍니다.</p>
 </footer>
 
 <script>
-/* ---------------- 기본값 (2026년 기준) ---------------- */
-const DEFAULT_MEDIAN = {1:2564238,2:4199292,3:5359036,4:6494738,5:7556719,6:8555952};
-const REGION_LABEL = {seoul:"서울특별시",gyeonggi:"경기도",metro:"광역시·세종·창원시",other:"그 외 지역"};
+/* ---------------- 기준값 ---------------- */
+const MEDIAN_BY_YEAR = {
+  2026: {1:2564238, 2:4199292, 3:5359036, 4:6494738, 5:7556719, 6:8555952},
+  2027: {1:2736042, 2:4480645, 3:5718091, 4:6929885, 5:8063019, 6:9129201}
+};
+const REGION_LABEL = {seoul:"서울특별시", gyeonggi:"경기도", metro:"광역시·세종·창원시", other:"그 외 지역"};
 
 function fmt(n){
   n = Math.round(n||0);
@@ -305,52 +417,76 @@ function fmt(n){
 }
 function fmtSigned(n){
   n = Math.round(n||0);
-  const s = n>=0? "+" : "-";
-  return s + Math.abs(n).toLocaleString('ko-KR') + "원";
+  return (n>=0? "+" : "-") + Math.abs(n).toLocaleString('ko-KR') + "원";
 }
+function num(id){ return Number(document.getElementById(id).value)||0; }
 
-/* ---------------- 기준 중위소득 설정 UI 생성 ---------------- */
+/* ---------------- 기준 중위소득 UI ---------------- */
+function currentYear(){ return document.getElementById('baseYear').value; }
+
 function buildMedianGrid(){
+  const year = currentYear();
+  const table = MEDIAN_BY_YEAR[year];
   const grid = document.getElementById('medianGrid');
-  grid.innerHTML='';
+  grid.innerHTML = '';
   for(let i=1;i<=6;i++){
     const div = document.createElement('div');
-    div.className='field';
-    div.innerHTML = `<label>${i}인 가구</label><input type="number" id="median_${i}" value="${DEFAULT_MEDIAN[i]}">`;
+    div.className = 'field';
+    div.innerHTML = `<label>${i}인 가구</label><input type="number" id="median_${i}" value="${table[i]}">`;
     grid.appendChild(div);
   }
+  document.getElementById('medianYearEcho').textContent = year;
+}
+function onYearChange(){
+  buildMedianGrid();
+  if(document.getElementById('result').style.display === 'block') calculate();
 }
 function getMedianTable(){
   const t = {};
-  for(let i=1;i<=6;i++){ t[i] = Number(document.getElementById('median_'+i).value)||0; }
+  for(let i=1;i<=6;i++){ t[i] = num('median_'+i); }
   return t;
 }
 function getMedianForSize(size, table){
   size = Math.max(1, Math.round(size));
   if(size<=6) return table[size];
-  const diff = table[6]-table[5];
-  return table[6] + diff*(size-6);
+  return table[6] + (table[6]-table[5])*(size-6);
+}
+function syncRegionHint(){
+  const r = document.getElementById('region').value;
+  const ded = {seoul:'dedSeoul', gyeonggi:'dedGyeonggi', metro:'dedMetro', other:'dedOther'}[r];
+  const cap = {seoul:'capSeoul', gyeonggi:'capGyeonggi', metro:'capMetro', other:'capOther'}[r];
+  document.getElementById('regionHint').textContent =
+    `기본재산액 ${fmt(num(ded))} / 주거용재산 한도액 ${fmt(num(cap))}`;
 }
 
-/* ---------------- 소득자(근로/사업) 동적 행 ---------------- */
-let incomeRowId=0;
+/* ---------------- 근로·사업소득자 행 ---------------- */
+const LABOR_CATEGORIES = {
+  none:   {label:'해당없음 (기본 30% 공제)',                       flat:0,          rate:'base'},
+  young:  {label:'34세 이하 수급(권)자 · 대학생 (60만원+30%)',      flat:'youthFlat',  rate:'base'},
+  senior: {label:'65세 이상 노인 · 등록장애인 · 북한이탈주민 (20만원+30%)', flat:'seniorFlat', rate:'base'},
+  school: {label:'35세 이상 초·중·고등학생 (20만원+30%)',           flat:'seniorFlat', rate:'base'},
+  rehab:  {label:'장애인·정신질환자 직업재활사업 참여소득 (20만원+50%)', flat:'seniorFlat', rate:'rehab'},
+  flat30: {label:'임신·분만 6개월 미만 여성 / 사회복무요원 / 행정인턴 (30%)', flat:0, rate:'base'}
+};
+
+let incomeRowId = 0;
 function addIncomeRow(amount=0, category='none', label=''){
   incomeRowId++;
   const id = incomeRowId;
+  let opts = '';
+  for(const key in LABOR_CATEGORIES){
+    opts += `<option value="${key}" ${category===key?'selected':''}>${LABOR_CATEGORIES[key].label}</option>`;
+  }
   const wrap = document.createElement('div');
-  wrap.className='dyn-row';
+  wrap.className = 'dyn-row';
   wrap.id = 'incomeRow_'+id;
   wrap.innerHTML = `
     <div class="field"><label>가구원 구분</label>
       <input type="text" id="incLabel_${id}" placeholder="예: 본인, 배우자" value="${label}">
     </div>
-    <div class="field"><label>월 근로소득</label><input type="number" id="incAmount_${id}" min="0" value="${amount}"></div>
-    <div class="field"><label>공제 특례</label>
-      <select id="incCategory_${id}">
-        <option value="none" ${category==='none'?'selected':''}>해당없음 (기본 30%공제)</option>
-        <option value="student" ${category==='student'?'selected':''}>대학생 (40만원+30%)</option>
-        <option value="youth" ${category==='youth'?'selected':''}>만19~34세 청년 / 24세이하 청소년한부모 (60만원+30%)</option>
-      </select>
+    <div class="field"><label>월 근로·사업소득</label><input type="number" id="incAmount_${id}" min="0" value="${amount}"></div>
+    <div class="field"><label>공제 특례 (가장 유리한 항목 1개)</label>
+      <select id="incCategory_${id}">${opts}</select>
     </div>
     <div></div>
     <button class="btn-del" onclick="document.getElementById('incomeRow_${id}').remove()">삭제</button>
@@ -358,27 +494,46 @@ function addIncomeRow(amount=0, category='none', label=''){
   document.getElementById('incomeRows').appendChild(wrap);
 }
 
-/* ---------------- 자동차 동적 행 ---------------- */
-let vehicleRowId=0;
-function addVehicleRow(displacement=1998, value=0, old10=false, category='general'){
+function laborDeductionAmount(income, category){
+  const conf = LABOR_CATEGORIES[category] || LABOR_CATEGORIES.none;
+  const baseRate = num('laborBaseRate')/100;
+  const rate = conf.rate==='rehab' ? num('rehabRate')/100 : baseRate;
+  const flat = conf.flat ? num(conf.flat) : 0;
+  if(flat === 0) return income*baseRate;
+  const applied = Math.min(income, flat);
+  return applied + Math.max(0, income-flat)*rate;
+}
+
+/* ---------------- 자동차 행 ---------------- */
+let vehicleRowId = 0;
+function addVehicleRow(type='car', displacement=1998, value=0, old10=false, use='general'){
   vehicleRowId++;
   const id = vehicleRowId;
   const wrap = document.createElement('div');
-  wrap.className='vrow';
+  wrap.className = 'vrow';
   wrap.id = 'vehicleRow_'+id;
   wrap.innerHTML = `
+    <div class="field"><label>차종</label>
+      <select id="vType_${id}">
+        <option value="car" ${type==='car'?'selected':''}>승용자동차</option>
+        <option value="van" ${type==='van'?'selected':''}>소형 이하 승합·화물자동차</option>
+        <option value="moto" ${type==='moto'?'selected':''}>이륜자동차</option>
+        <option value="etc" ${type==='etc'?'selected':''}>그 밖의 자동차(중형 이상 승합·화물, 특수 등)</option>
+      </select>
+    </div>
     <div class="field"><label>배기량(cc)</label><input type="number" id="vDisp_${id}" min="0" value="${displacement}"></div>
     <div class="field"><label>차량가액(원)</label><input type="number" id="vValue_${id}" min="0" value="${value}"></div>
-    <div class="field"><label>10년 이상 사용</label>
+    <div class="field"><label>차령 10년 이상</label>
       <select id="vOld_${id}"><option value="0" ${!old10?'selected':''}>아니오</option><option value="1" ${old10?'selected':''}>예</option></select>
     </div>
-    <div class="field"><label>용도/유형</label>
-      <select id="vCat_${id}">
-        <option value="general" ${category==='general'?'selected':''}>일반 승용차</option>
-        <option value="business" ${category==='business'?'selected':''}>생업용 자동차 (1대 한정, 재산제외)</option>
-        <option value="disabled" ${category==='disabled'?'selected':''}>중증장애인 이동수단 (2000cc미만, 1대)</option>
-        <option value="veteran" ${category==='veteran'?'selected':''}>국가유공자(상이1~3급) 이동수단 (2000cc미만, 1대)</option>
-        <option value="multichild" ${category==='multichild'?'selected':''}>다자녀가구 특례차량 (2자녀 이상, 소득요건 충족 가정)</option>
+    <div class="field"><label>용도·가구 특성</label>
+      <select id="vUse_${id}">
+        <option value="general" ${use==='general'?'selected':''}>해당 없음</option>
+        <option value="business" ${use==='business'?'selected':''}>생업용 자동차 (가구별 1대)</option>
+        <option value="disabled" ${use==='disabled'?'selected':''}>중증장애인·국가유공자(상이1~3급) 본인 이동수단 (1대)</option>
+        <option value="medical" ${use==='medical'?'selected':''}>거동곤란 가구원 병원치료용 (불가피 인정)</option>
+        <option value="multichild" ${use==='multichild'?'selected':''}>6인 이상 가구 또는 18세 미만 자녀 2명 이상</option>
+        <option value="immobile" ${use==='immobile'?'selected':''}>압류·멸실·불법명의·2개월 내 처분예정</option>
       </select>
     </div>
     <button class="btn-del" onclick="document.getElementById('vehicleRow_${id}').remove()">삭제</button>
@@ -386,143 +541,289 @@ function addVehicleRow(displacement=1998, value=0, old10=false, category='genera
   document.getElementById('vehicleRows').appendChild(wrap);
 }
 
-/* ---------------- 근로소득공제 계산 ---------------- */
-function laborDeductionAmount(income, category){
-  const baseRate = Number(document.getElementById('laborBaseRate').value)/100;
-  const studentFlat = Number(document.getElementById('studentFlat').value);
-  const youthFlat = Number(document.getElementById('youthFlat').value);
-  let flat = 0;
-  if(category==='student') flat = studentFlat;
-  else if(category==='youth') flat = youthFlat;
-  const remain = Math.max(0, income - flat);
-  return flat===0 ? income*baseRate : flat + remain*baseRate;
+/* 자동차 분류: exclude(제외) / reduced(4.17%) / full(100%) */
+function classifyVehicle(v){
+  const cheapOrOld = v.old10 || v.value < 5000000;
+
+  if(v.use === 'disabled'){
+    if(v.disp < 2000) return {cls:'exclude', note:'장애인사용자동차(2,000cc 미만): 재산산정 제외'};
+    if(v.disp < 2500) return {cls:'reduced', note:'중증장애인 본인 이동수단(2,500cc 미만): 일반재산 환산율'};
+    return {cls:'full', note:'2,500cc 이상: 제외·완화 요건 미충족'};
+  }
+  if(v.use === 'business'){
+    if(v.type === 'car' && v.disp >= 2000) return {cls:'full', note:'생업용 승용차는 2,000cc 미만만 제외 대상'};
+    return {cls:'exclude', note:'생업용 자동차: 재산산정 제외'};
+  }
+  if(v.use === 'immobile') return {cls:'reduced', note:'압류·멸실·처분예정 등: 일반재산 환산율'};
+  if(v.use === 'medical'){
+    if(v.type === 'car' && v.disp < 2000) return {cls:'reduced', note:'거동곤란 병원치료용(2,000cc 미만): 일반재산 환산율'};
+    return {cls:'full', note:'거동곤란 특례는 2,000cc 미만 승용차만 해당'};
+  }
+  if(v.use === 'multichild'){
+    if(v.disp < 2500 && cheapOrOld) return {cls:'reduced', note:'다자녀·6인 이상 가구 특례(2,500cc 미만, 차령 10년 이상 또는 500만원 미만): 일반재산 환산율'};
+    return {cls:'full', note:'다자녀 특례 요건(2,500cc 미만 + 차령 10년 이상 또는 500만원 미만) 미충족'};
+  }
+  if(v.type === 'car'){
+    if(v.disp < 2000 && cheapOrOld) return {cls:'reduced', note:'2,000cc 미만 + 차령 10년 이상 또는 500만원 미만: 일반재산 환산율'};
+    return {cls:'full', note:'승용차 완화 요건 미충족'};
+  }
+  if(v.type === 'van'){
+    if(cheapOrOld) return {cls:'reduced', note:'소형 이하 승합·화물 + 차령 10년 이상 또는 500만원 미만: 일반재산 환산율'};
+    return {cls:'full', note:'승합·화물 완화 요건 미충족'};
+  }
+  if(v.type === 'moto'){
+    if(v.disp <= 260) return {cls:'reduced', note:'260cc 이하 이륜자동차: 일반재산 환산율'};
+    return {cls:'full', note:'260cc 초과 이륜자동차'};
+  }
+  return {cls:'full', note:'원칙 적용(월 100%)'};
 }
 
-/* ---------------- 자동차 소득환산 ---------------- */
-function vehicleConversion(){
-  let total = 0;
-  const details = [];
-  const rows = document.querySelectorAll('[id^=vehicleRow_]');
+/* 보유 한도 반영 후 최종 분류 */
+function collectVehicles(){
+  const list = [];
+  document.querySelectorAll('[id^=vehicleRow_]').forEach(row=>{
+    const id = row.id.split('_')[1];
+    list.push({
+      type: document.getElementById('vType_'+id).value,
+      disp: num('vDisp_'+id),
+      value: num('vValue_'+id),
+      old10: document.getElementById('vOld_'+id).value === '1',
+      use: document.getElementById('vUse_'+id).value
+    });
+  });
+
+  let exclDisabled = 0, exclBusiness = 0, reducedCount = 0;
+  const warns = [];
+  const result = list.map(v=>{
+    const c = classifyVehicle(v);
+    let cls = c.cls, note = c.note;
+    if(cls === 'exclude'){
+      if(v.use === 'disabled'){
+        exclDisabled++;
+        if(exclDisabled > 1){ cls='full'; note='장애인사용자동차 제외 한도(1대) 초과: 월 100% 적용'; warns.push(note); }
+      } else {
+        exclBusiness++;
+        if(exclBusiness > 1){ cls='full'; note='생업용 자동차 제외 한도(1대) 초과: 월 100% 적용'; warns.push(note); }
+      }
+    } else if(cls === 'reduced' && v.use !== 'immobile'){
+      reducedCount++;
+      if(reducedCount > 1){ cls='full'; note='일반재산 환산율 적용 한도(1대) 초과: 월 100% 적용'; warns.push(note); }
+    }
+    return Object.assign({}, v, {cls, note});
+  });
+  return {list: result, warns};
+}
+
+/* ---------------- 부양의무자 가구 ---------------- */
+let dutyRowId = 0;
+function addDutyRow(label='', size=2, region='other'){
+  dutyRowId++;
+  const id = dutyRowId;
+  const wrap = document.createElement('div');
+  wrap.className = 'card';
+  wrap.style.cssText = 'box-shadow:none;border:1px solid #e2e8f0;margin-bottom:12px;';
+  wrap.id = 'dutyRow_'+id;
+  wrap.innerHTML = `
+    <div class="grid">
+      <div class="field"><label>부양의무자 구분</label>
+        <input type="text" id="dLabel_${id}" placeholder="예: 장남, 부(父)" value="${label}">
+      </div>
+      <div class="field"><label>부양능력판정 가구원 수</label>
+        <input type="number" id="dSize_${id}" min="1" max="12" value="${size}">
+        <div class="hint">배우자·미혼 자녀 등 산정범위 가구원. 「장애인연금법」상 중증장애인이 있으면 그 수만큼 가구원 수를 추가 산정합니다.</div>
+      </div>
+      <div class="field"><label>거주 지역</label>
+        <select id="dRegion_${id}">
+          <option value="seoul" ${region==='seoul'?'selected':''}>서울특별시</option>
+          <option value="gyeonggi" ${region==='gyeonggi'?'selected':''}>경기도</option>
+          <option value="metro" ${region==='metro'?'selected':''}>광역시 · 세종시 · 창원시</option>
+          <option value="other" ${region==='other'?'selected':''}>그 외 지역</option>
+        </select>
+      </div>
+      <div class="field"><label>부양능력 판정소득액 (월)</label>
+        <input type="number" id="dIncome_${id}" min="0" value="0">
+        <div class="hint">실제소득에서 교육비·의료비·필수 지출비용 등 차감항목을 반영한 금액</div>
+      </div>
+      <div class="field"><label>주거용재산</label>
+        <input type="number" id="dHousing_${id}" min="0" value="0">
+        <div class="hint">부양의무자는 거주 여부·한도액 구분 없이 주거용재산으로 인정됩니다.</div>
+      </div>
+      <div class="field"><label>일반재산</label><input type="number" id="dGeneral_${id}" min="0" value="0"></div>
+      <div class="field"><label>금융재산</label><input type="number" id="dFinancial_${id}" min="0" value="0"></div>
+      <div class="field"><label>자동차 가액</label>
+        <input type="number" id="dCar_${id}" min="0" value="0">
+        <div class="hint">중증장애인·상이등급 1~3급 부양의무자 본인 명의 장애인사용자동차 1대는 제외하고 입력하세요.</div>
+      </div>
+      <div class="field"><label>부채</label><input type="number" id="dDebt_${id}" min="0" value="0"></div>
+    </div>
+    <div class="actions"><button class="btn-del" onclick="document.getElementById('dutyRow_${id}').remove()">이 부양의무자 삭제</button></div>
+  `;
+  document.getElementById('dutyRows').appendChild(wrap);
+}
+
+function dutyPropertyConversion(v){
+  const basicMap = {seoul:'dDedSeoul', gyeonggi:'dDedGyeonggi', metro:'dDedMetro', other:'dDedOther'};
+  const basic = num(basicMap[v.region]);
+  const finBasic = num('finBasicDeduction');
+
+  let hous = v.housing;
+  let gen = v.general + v.car;
+  let fin = Math.max(0, v.financial - finBasic);
+
+  let pool = v.debt + basic;
+  const cutHous = Math.min(pool, hous); hous -= cutHous; pool -= cutHous;
+  const cutGen = Math.min(pool, gen); gen -= cutGen; pool -= cutGen;
+  const cutFin = Math.min(pool, fin); fin -= cutFin; pool -= cutFin;
+
+  const rH = num('dRateHousing')/100;
+  const rG = num('dRateGeneral')/100;
+  return {
+    conversion: hous*rH + gen*rG + fin*rG,
+    basic, housAfter:hous, genAfter:gen, finAfter:fin, cut: cutHous+cutGen+cutFin
+  };
+}
+
+function dutyEvaluation(A, medianTable){
+  if(!document.getElementById('dutyEnable').checked) return null;
+  const rows = document.querySelectorAll('[id^=dutyRow_]');
+  if(!rows.length) return null;
+
+  const vulnerable = document.getElementById('dutyVulnerable').checked;
+  const rateA = num('dRateA')/100, rateB = num('dRateB')/100;
+  const rateSoft = num('dRateSoft')/100, rateProp = num('dRateProp')/100;
+
+  const results = [];
   rows.forEach(row=>{
     const id = row.id.split('_')[1];
-    const disp = Number(document.getElementById('vDisp_'+id).value)||0;
-    const value = Number(document.getElementById('vValue_'+id).value)||0;
-    const old10 = document.getElementById('vOld_'+id).value==='1';
-    const cat = document.getElementById('vCat_'+id).value;
-    const rateCar = Number(document.getElementById('rateCar').value)/100;
-    const rateReduced = Number(document.getElementById('rateCarReduced').value)/100;
+    const v = {
+      label: document.getElementById('dLabel_'+id).value || '부양의무자',
+      size: num('dSize_'+id) || 1,
+      region: document.getElementById('dRegion_'+id).value,
+      income: num('dIncome_'+id),
+      housing: num('dHousing_'+id),
+      general: num('dGeneral_'+id),
+      financial: num('dFinancial_'+id),
+      car: num('dCar_'+id),
+      debt: num('dDebt_'+id)
+    };
+    const B = getMedianForSize(v.size, medianTable);
+    const baseLine = A*rateA + B*rateB;
+    const softLine = (A+B)*rateSoft;
+    const incomeLine = vulnerable ? Math.max(baseLine, softLine) : baseLine;
+    const propLine = (A+B)*rateProp;
 
-    let rate = rateCar, note='원칙 적용(100%)', excluded=false;
-    if(cat==='business'){ excluded=true; note='생업용 1대: 재산산정 제외'; }
-    else if(cat==='disabled' && disp<2000){ excluded=true; note='중증장애인 이동수단: 재산산정 제외'; }
-    else if(cat==='veteran' && disp<2000){ excluded=true; note='국가유공자 이동수단: 재산산정 제외'; }
-    else if(cat==='multichild'){ rate = rateReduced; note='다자녀 특례: 완화율 적용'; }
-    else if(disp<2000 && value<5000000){ rate = rateReduced; note='2000cc미만·500만원미만: 완화율 적용'; }
-    else if(old10 && value<5000000){ rate = rateReduced; note='10년이상·500만원미만: 완화율 적용'; }
+    const prop = dutyPropertyConversion(v);
+    const incomeOver = v.income >= incomeLine;
+    const propOver = prop.conversion >= propLine;
+    const capable = incomeOver || propOver;
 
-    const conv = excluded? 0 : value*rate;
-    total += conv;
-    details.push(`차량(배기량 ${disp}cc, 가액 ${fmt(value)}) → ${note} → 환산액 ${fmt(conv)}`);
+    let reason;
+    if(!capable) reason = '소득기준·재산기준 모두 충족';
+    else if(incomeOver && propOver) reason = '소득기준·재산기준 모두 초과';
+    else if(incomeOver) reason = '소득기준 초과';
+    else reason = '재산기준 초과';
+
+    results.push({v, B, incomeLine, propLine, baseLine, softLine, prop, capable, reason});
   });
-  return {total, details};
+
+  return {results, vulnerable, anyCapable: results.some(r=>r.capable)};
 }
 
-/* ---------------- 재산의 소득환산액 계산 ---------------- */
+/* ---------------- 재산의 소득환산액 ---------------- */
 function propertyConversion(){
-  const housing = Number(document.getElementById('housingProperty').value)||0;
-  const general = Number(document.getElementById('generalProperty').value)||0;
-  const financial = Number(document.getElementById('financialProperty').value)||0;
-  let debt = Number(document.getElementById('debt').value)||0;
-  const finBasic = Number(document.getElementById('finBasicDeduction').value)||0;
   const region = document.getElementById('region').value;
-  const dedMap = {
-    seoul: Number(document.getElementById('dedSeoul').value)||0,
-    gyeonggi: Number(document.getElementById('dedGyeonggi').value)||0,
-    metro: Number(document.getElementById('dedMetro').value)||0,
-    other: Number(document.getElementById('dedOther').value)||0,
-  };
-  let regionDeduction = dedMap[region]||0;
+  const basicMap = {seoul:'dedSeoul', gyeonggi:'dedGyeonggi', metro:'dedMetro', other:'dedOther'};
+  const capMap = {seoul:'capSeoul', gyeonggi:'capGyeonggi', metro:'capMetro', other:'capOther'};
+  const basicDeduction = num(basicMap[region]);
+  const housingCap = num(capMap[region]);
 
-  // 금융재산 기본공제 우선 적용
-  let finAfterBasic = Math.max(0, financial - finBasic);
+  const housingInput = num('housingProperty');
+  const generalInput = num('generalProperty');
+  const financialInput = num('financialProperty');
+  const debt = num('debt');
+  const finBasic = num('finBasicDeduction');
 
-  // 부채 차감: 일반 -> 주거용 -> 금융
-  let gen = general, hous = housing, fin = finAfterBasic;
-  let rem = debt;
-  const takeGen = Math.min(rem, gen); gen -= takeGen; rem -= takeGen;
-  const takeHous = Math.min(rem, hous); hous -= takeHous; rem -= takeHous;
-  const takeFin = Math.min(rem, fin); fin -= takeFin; rem -= takeFin;
+  const veh = collectVehicles();
+  const vehReducedValue = veh.list.filter(v=>v.cls==='reduced').reduce((s,v)=>s+v.value, 0);
+  const vehFullValue = veh.list.filter(v=>v.cls==='full').reduce((s,v)=>s+v.value, 0);
 
-  // 지역 기본재산액공제 차감: 주거용 -> 일반 -> 금융
-  let rd = regionDeduction;
-  const dHous = Math.min(rd, hous); hous -= dHous; rd -= dHous;
-  const dGen = Math.min(rd, gen); gen -= dGen; rd -= dGen;
-  const dFin = Math.min(rd, fin); fin -= dFin; rd -= dFin;
+  // 주거용재산 한도액 초과분은 일반재산으로 산정
+  let hous = Math.min(housingInput, housingCap);
+  const housingExcess = Math.max(0, housingInput - housingCap);
+  let gen = generalInput + housingExcess + vehReducedValue;
+  let fin = Math.max(0, financialInput - finBasic);
 
-  const rateHousing = Number(document.getElementById('rateHousing').value)/100;
-  const rateGeneral = Number(document.getElementById('rateGeneral').value)/100;
-  const rateFinancial = Number(document.getElementById('rateFinancial').value)/100;
+  // 부채·기본재산액 차감: 주거용 → 일반(일반재산 환산율 자동차 포함) → 금융
+  let pool = debt + basicDeduction;
+  const cutHous = Math.min(pool, hous); hous -= cutHous; pool -= cutHous;
+  const cutGen = Math.min(pool, gen); gen -= cutGen; pool -= cutGen;
+  const cutFin = Math.min(pool, fin); fin -= cutFin; pool -= cutFin;
+  const totalCut = cutHous + cutGen + cutFin;
+
+  const rateHousing = num('rateHousing')/100;
+  const rateGeneral = num('rateGeneral')/100;
+  const rateFinancial = num('rateFinancial')/100;
+  const rateCar = num('rateCar')/100;
 
   const convHous = hous*rateHousing;
   const convGen = gen*rateGeneral;
   const convFin = fin*rateFinancial;
-
-  const veh = vehicleConversion();
-
-  const total = convHous+convGen+convFin+veh.total;
+  const convVehFull = vehFullValue*rateCar;
 
   return {
-    total, convHous, convGen, convFin, vehicle:veh.total, vehicleDetails:veh.details,
-    housAfter:hous, genAfter:gen, finAfter:fin, regionDeduction, finBasic, debtUsed: takeGen+takeHous+takeFin
+    total: convHous+convGen+convFin+convVehFull,
+    convHous, convGen, convFin, convVehFull,
+    housAfter:hous, genAfter:gen, finAfter:fin,
+    basicDeduction, housingCap, housingExcess, finBasic, debt,
+    vehReducedValue, vehFullValue, totalCut, unusedDeduction: pool,
+    vehicles: veh.list, vehicleWarns: veh.warns
   };
 }
 
-/* ---------------- 소득평가액 계산 ---------------- */
+/* ---------------- 소득평가액 ---------------- */
 function incomeEvaluation(){
   let laborTotal = 0, laborDeductedTotal = 0;
   const details = [];
   document.querySelectorAll('[id^=incomeRow_]').forEach(row=>{
     const id = row.id.split('_')[1];
-    const amount = Number(document.getElementById('incAmount_'+id).value)||0;
+    const amount = num('incAmount_'+id);
     const category = document.getElementById('incCategory_'+id).value;
     const label = document.getElementById('incLabel_'+id).value || '가구원';
     const ded = laborDeductionAmount(amount, category);
-    const evaluated = Math.max(0, amount-ded);
     laborTotal += amount;
     laborDeductedTotal += ded;
-    details.push(`${label}: 근로소득 ${fmt(amount)} − 공제 ${fmt(ded)} = ${fmt(evaluated)}`);
+    details.push(`${label}: 근로·사업소득 ${fmt(amount)} − 공제 ${fmt(ded)} = ${fmt(Math.max(0, amount-ded))}`);
   });
-  const laborEvaluated = laborTotal - laborDeductedTotal;
 
-  const propertyIncome = Number(document.getElementById('propertyIncome').value)||0;
-  const publicTransfer = Number(document.getElementById('publicTransfer').value)||0;
-  const privateTransfer = Number(document.getElementById('privateTransfer').value)||0;
-  const hhExpense = Number(document.getElementById('hhExpense').value)||0;
+  const propertyIncome = num('propertyIncome');
+  const publicTransfer = num('publicTransfer');
+  const privateTransfer = num('privateTransfer');
+  const hhExpense = num('hhExpense');
 
-  const totalEvaluated = laborEvaluated+propertyIncome+publicTransfer+privateTransfer;
-  const incomeAssessment = Math.max(0, totalEvaluated - hhExpense);
-
-  return {incomeAssessment, laborTotal, laborDeductedTotal, laborEvaluated, propertyIncome, publicTransfer, privateTransfer, hhExpense, details};
+  const totalEvaluated = (laborTotal-laborDeductedTotal)+propertyIncome+publicTransfer+privateTransfer;
+  return {
+    incomeAssessment: Math.max(0, totalEvaluated-hhExpense),
+    propertyIncome, publicTransfer, privateTransfer, hhExpense, details
+  };
 }
 
 /* ---------------- 메인 계산 ---------------- */
 function calculate(){
-  const hhSize = Number(document.getElementById('hhSize').value)||1;
-  const medianTable = getMedianTable();
-  const median = getMedianForSize(hhSize, medianTable);
+  const hhSize = num('hhSize') || 1;
+  const median = getMedianForSize(hhSize, getMedianTable());
 
   const inc = incomeEvaluation();
   const prop = propertyConversion();
   const incomeRecog = inc.incomeAssessment + prop.total;
 
   const rates = {
-    생계급여: Number(document.getElementById('rLivelihood').value)/100,
-    의료급여: Number(document.getElementById('rMedical').value)/100,
-    주거급여: Number(document.getElementById('rHousing').value)/100,
-    교육급여: Number(document.getElementById('rEducation').value)/100,
-    차상위계층: Number(document.getElementById('rNearPoor').value)/100,
-    한부모가족: Number(document.getElementById('rSingleParent').value)/100,
-    청소년한부모_조손가족: Number(document.getElementById('rYouthSingleParent').value)/100,
+    생계급여: num('rLivelihood')/100,
+    의료급여: num('rMedical')/100,
+    주거급여: num('rHousing')/100,
+    교육급여: num('rEducation')/100,
+    차상위계층: num('rNearPoor')/100,
+    한부모가족: num('rSingleParent')/100,
+    청소년한부모_조손가족: num('rYouthSingleParent')/100
   };
 
   const rows = [
@@ -532,135 +833,242 @@ function calculate(){
     {key:'교육급여', label:'교육급여 (국민기초생활수급자)'},
     {key:'차상위계층', label:'차상위계층 (차상위본인부담경감·자활·장애수당 등)'},
     {key:'한부모가족', label:'한부모가족 · 조손가족(부모 25세 이상)'},
-    {key:'청소년한부모_조손가족', label:'청소년한부모(24세 이하) · 조손가족 완화기준'},
+    {key:'청소년한부모_조손가족', label:'청소년한부모(24세 이하) · 조손가족 완화기준'}
   ];
 
+  const duty = dutyEvaluation(median, getMedianTable());
+
   let basicRecipient = false;
-  let qualifiedLabels = [];
+  const qualifiedBenefits = [];
   const tbody = document.querySelector('#resultTable tbody');
-  tbody.innerHTML='';
+  tbody.innerHTML = '';
   rows.forEach(r=>{
     const threshold = median*rates[r.key];
-    const pass = incomeRecog <= threshold;
-    if(['생계급여','의료급여','주거급여','교육급여'].includes(r.key) && pass) basicRecipient=true;
-    if(pass) qualifiedLabels.push(r.label.split(' (')[0].split(' ·')[0]);
+    let pass = incomeRecog <= threshold;
+    let note = '';
+    if(r.key === '의료급여' && pass && duty && duty.anyCapable){
+      pass = false;
+      note = '부양의무자 기준 미충족';
+    }
+    if(['생계급여','의료급여','주거급여','교육급여'].includes(r.key) && pass){
+      basicRecipient = true;
+      qualifiedBenefits.push(r.key);
+    }
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${r.label}</td>
       <td>중위소득의 ${(rates[r.key]*100).toFixed(1)}%</td>
       <td>${fmt(threshold)}</td>
-      <td><span class="pill ${pass?'ok':'no'}">${pass?'적합(해당)':'부적합(해당없음)'}</span></td>
+      <td><span class="pill ${pass?'ok':'no'}">${pass?'적합(해당)':(note||'부적합(해당없음)')}</span></td>
       <td>${fmtSigned(threshold-incomeRecog)}</td>
     `;
     tbody.appendChild(tr);
   });
 
-  // 요약
+  renderDuty(duty, median);
+
   const summaryBox = document.getElementById('summaryBox');
   if(basicRecipient){
-    summaryBox.className='summaryBox ok';
-    summaryBox.innerHTML = `<b>판정 요약:</b> 소득인정액 ${fmt(incomeRecog)} 기준, 아래 급여 항목에서 <b>국민기초생활수급자 요건을 충족</b>하는 것으로 추정됩니다: ${qualifiedLabels.filter(l=>l.includes('급여')).join(', ')}`;
+    summaryBox.className = 'summaryBox ok';
+    summaryBox.innerHTML = `<b>판정 요약:</b> 소득인정액 ${fmt(incomeRecog)} 기준, <b>${qualifiedBenefits.join(' · ')}</b> 선정기준을 충족하는 것으로 추정됩니다.`;
   } else {
     const nearOk = incomeRecog <= median*rates['차상위계층'];
-    summaryBox.className = nearOk? 'summaryBox ok' : 'summaryBox no';
+    summaryBox.className = nearOk ? 'summaryBox ok' : 'summaryBox no';
     summaryBox.innerHTML = nearOk
-      ? `<b>판정 요약:</b> 소득인정액 ${fmt(incomeRecog)} 기준, 국민기초생활수급자(생계·의료·주거·교육급여) 요건에는 해당하지 않으나 <b>차상위계층 기준(중위소득 50%)</b>에는 해당하는 것으로 추정됩니다.`
-      : `<b>판정 요약:</b> 소득인정액 ${fmt(incomeRecog)} 기준, 국민기초생활수급자 및 차상위계층 요건 모두 <b>해당하지 않는 것</b>으로 추정됩니다.`;
+      ? `<b>판정 요약:</b> 소득인정액 ${fmt(incomeRecog)} 기준, 생계·의료·주거·교육급여 선정기준에는 해당하지 않으나 <b>차상위계층 기준(중위소득 50%)</b>에는 해당하는 것으로 추정됩니다.`
+      : `<b>판정 요약:</b> 소득인정액 ${fmt(incomeRecog)} 기준, 국민기초생활수급자 및 차상위계층 선정기준에 <b>해당하지 않는 것</b>으로 추정됩니다.`;
   }
 
-  // 헤드라인/브레이크다운
   document.getElementById('outIncomeRecog').textContent = fmt(incomeRecog);
   document.getElementById('outIncomeEval').textContent = fmt(inc.incomeAssessment);
   document.getElementById('outPropConv').textContent = fmt(prop.total);
   document.getElementById('szEcho').textContent = hhSize;
+  document.getElementById('yearEcho').textContent = currentYear();
 
   let bd = `<b>■ 소득 상세</b><br>`;
   inc.details.forEach(d=> bd += d+"<br>");
   bd += `기타소득: 재산소득 ${fmt(inc.propertyIncome)} + 공적이전 ${fmt(inc.publicTransfer)} + 사적이전 ${fmt(inc.privateTransfer)}<br>`;
-  bd += `가구특성별 지출비용 차감: −${fmt(inc.hhExpense)}<br><br>`;
-  bd += `<b>■ 재산 상세</b> (거주지역: ${REGION_LABEL[document.getElementById('region').value]}, 재산 기본공제액 ${fmt(prop.regionDeduction)}, 부채 상계 ${fmt(prop.debtUsed)}, 금융재산 기본공제 ${fmt(prop.finBasic)})<br>`;
-  bd += `주거용재산 공제후 잔액 ${fmt(prop.housAfter)} × 1.04% = ${fmt(prop.convHous)}<br>`;
-  bd += `일반재산 공제후 잔액 ${fmt(prop.genAfter)} × 4.17% = ${fmt(prop.convGen)}<br>`;
-  bd += `금융재산 공제후 잔액 ${fmt(prop.finAfter)} × 6.26% = ${fmt(prop.convFin)}<br>`;
-  prop.vehicleDetails.forEach(d=> bd += d+"<br>");
-  bd += `<br>기준 중위소득 (${hhSize}인 가구): <code>${fmt(median)}</code>`;
+  bd += `가구특성별 지출비용 차감: −${fmt(inc.hhExpense)}<br>`;
+  bd += `소득평가액 = ${fmt(inc.incomeAssessment)}<br><br>`;
+
+  bd += `<b>■ 재산 상세</b> (거주지역 ${REGION_LABEL[document.getElementById('region').value]}, 기본재산액 ${fmt(prop.basicDeduction)}, 부채 ${fmt(prop.debt)}, 금융 생활준비금 공제 ${fmt(prop.finBasic)})<br>`;
+  if(prop.housingExcess > 0){
+    bd += `주거용재산 한도액 ${fmt(prop.housingCap)} 초과분 ${fmt(prop.housingExcess)}은 일반재산으로 산정<br>`;
+  }
+  if(prop.vehReducedValue > 0){
+    bd += `일반재산 환산율 적용 자동차 가액 ${fmt(prop.vehReducedValue)}을 일반재산에 합산<br>`;
+  }
+  bd += `부채·기본재산액 차감 합계 ${fmt(prop.totalCut)} (주거용 → 일반 → 금융 순)<br>`;
+  bd += `주거용재산 잔액 ${fmt(prop.housAfter)} × ${num('rateHousing')}% = ${fmt(prop.convHous)}<br>`;
+  bd += `일반재산 잔액 ${fmt(prop.genAfter)} × ${num('rateGeneral')}% = ${fmt(prop.convGen)}<br>`;
+  bd += `금융재산 잔액 ${fmt(prop.finAfter)} × ${num('rateFinancial')}% = ${fmt(prop.convFin)}<br>`;
+  bd += `월 100% 적용 자동차 ${fmt(prop.vehFullValue)} → ${fmt(prop.convVehFull)}<br>`;
+  if(prop.unusedDeduction > 0){
+    bd += `※ 차감하지 못한 부채·기본재산액 ${fmt(prop.unusedDeduction)}은 월 100% 적용 자동차 가액에서 차감하지 않습니다.<br>`;
+  }
+  if(prop.vehicles.length){
+    bd += `<br><b>■ 자동차 분류</b><br>`;
+    prop.vehicles.forEach((v,i)=>{
+      const clsLabel = v.cls==='exclude' ? '재산산정 제외' : (v.cls==='reduced' ? `일반재산 환산율(${num('rateGeneral')}%)` : `원칙(월 ${num('rateCar')}%)`);
+      bd += `${i+1}번 차량 (${v.disp}cc, ${fmt(v.value)}) → ${clsLabel} — ${v.note}<br>`;
+    });
+  }
+  bd += `<br>재산의 소득환산액 = ${fmt(prop.total)}<br>`;
+  bd += `기준 중위소득 (${currentYear()}년 ${hhSize}인 가구): <code>${fmt(median)}</code>`;
   document.getElementById('breakdownDetail').innerHTML = bd;
 
-  // 부양의무자 경고
   const dutyWarn = document.getElementById('dutyWarn');
-  if(document.getElementById('dutyHasCapacity').checked){
-    dutyWarn.style.display='block';
-    dutyWarn.innerHTML = `⚠ 부양의무자 부양능력 '충분' 가능성을 체크하셨습니다. <b>의료급여</b>는 부양의무자 기준이 남아있어, 위 표의 의료급여 결과와 무관하게 부양의무자의 소득·재산 조사 결과에 따라 실제로는 <b>수급자에서 제외될 수 있습니다.</b> (중증장애인 등 부양의무자 기준 미적용 대상은 예외) 생계·주거·교육급여, 차상위계층, 한부모가족 기준에는 부양의무자 기준이 적용되지 않습니다.`;
+  if(duty && duty.anyCapable){
+    dutyWarn.style.display = 'block';
+    dutyWarn.innerHTML = `⚠ 부양능력이 있는 부양의무자가 있어 <b>의료급여 수급자에 해당하지 않는 것</b>으로 추정됩니다. 다만 가족관계 단절 등으로 실제 부양을 받을 수 없는 경우에는 부양의무자 기준을 충족한 것으로 볼 수 있으므로 관할 시·군·구의 사실조사가 필요합니다. 생계·주거·교육급여와 차상위계층·한부모가족 기준에는 부양의무자 기준이 적용되지 않습니다.`;
+  } else if(duty){
+    dutyWarn.style.display = 'block';
+    dutyWarn.innerHTML = `등록한 부양의무자 모두 <b>부양능력 없음</b>으로 판정되어 의료급여 부양의무자 기준을 충족하는 것으로 추정됩니다.`;
   } else {
-    dutyWarn.style.display='none';
+    dutyWarn.style.display = 'none';
   }
 
-  document.getElementById('result').style.display='block';
+  const vehWarn = document.getElementById('vehicleWarn');
+  if(prop.vehicleWarns.length){
+    vehWarn.style.display = 'block';
+    vehWarn.innerHTML = `⚠ 자동차 보유 한도 초과: ${prop.vehicleWarns.join(' / ')}. 지방생활보장위원회 심의를 거쳐 달리 판단될 수 있습니다.`;
+  } else {
+    vehWarn.style.display = 'none';
+  }
+
+  document.getElementById('result').style.display = 'block';
   document.getElementById('result').scrollIntoView({behavior:'smooth', block:'start'});
 }
 
-/* ---------------- 초기화/샘플/리셋 ---------------- */
+function renderDuty(duty, A){
+  const card = document.getElementById('dutyCard');
+  if(!duty){ card.style.display = 'none'; return; }
+  card.style.display = 'block';
+
+  const tbody = document.querySelector('#dutyTable tbody');
+  tbody.innerHTML = '';
+  duty.results.forEach(r=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${r.v.label} (${r.v.size}인, ${REGION_LABEL[r.v.region]})</td>
+      <td>${fmt(r.v.income)}</td>
+      <td>${fmt(r.incomeLine)}</td>
+      <td>${fmt(r.prop.conversion)}</td>
+      <td>${fmt(r.propLine)}</td>
+      <td><span class="pill ${r.capable?'no':'ok'}">${r.capable?'부양능력 있음':'부양능력 없음'}</span></td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  let bd = `<b>■ 판정 기준</b><br>`;
+  bd += `A(수급권자 가구 기준 중위소득) = ${fmt(A)}<br>`;
+  bd += `소득기준 = (A×${num('dRateA')}%) + (B×${num('dRateB')}%)`;
+  bd += duty.vulnerable ? ` 와 (A+B)×${num('dRateSoft')}% 중 높은 값 (취약계층 완화 적용)<br>` : `<br>`;
+  bd += `재산기준 = (A+B)×${num('dRateProp')}%<br>`;
+  bd += `소득기준과 재산기준을 동시에 충족해야 부양능력 없음으로 판정합니다.<br><br>`;
+
+  duty.results.forEach(r=>{
+    bd += `<b>■ ${r.v.label}</b> — B(${r.v.size}인 가구 기준 중위소득) = ${fmt(r.B)}<br>`;
+    bd += `소득기준 ${fmt(r.incomeLine)}`;
+    if(duty.vulnerable) bd += ` [(A×${num('dRateA')}%)+(B×${num('dRateB')}%) = ${fmt(r.baseLine)} / (A+B)×${num('dRateSoft')}% = ${fmt(r.softLine)}]`;
+    bd += ` ↔ 판정소득액 ${fmt(r.v.income)}<br>`;
+    bd += `기본재산액 ${fmt(r.prop.basic)}, 부채·기본재산액 차감 합계 ${fmt(r.prop.cut)}<br>`;
+    bd += `주거용 잔액 ${fmt(r.prop.housAfter)} × ${num('dRateHousing')}% + 일반·자동차 잔액 ${fmt(r.prop.genAfter)} × ${num('dRateGeneral')}% + 금융 잔액 ${fmt(r.prop.finAfter)} × ${num('dRateGeneral')}%<br>`;
+    bd += `재산의 소득환산액 ${fmt(r.prop.conversion)} ↔ 재산기준 ${fmt(r.propLine)}<br>`;
+    bd += `판정: <b>${r.capable?'부양능력 있음':'부양능력 없음'}</b> (${r.reason})<br><br>`;
+  });
+  document.getElementById('dutyDetail').innerHTML = bd;
+}
+
+/* ---------------- 초기화 · 예시 · 기준값 재설정 ---------------- */
 function resetAll(){
-  document.getElementById('incomeRows').innerHTML='';
-  document.getElementById('vehicleRows').innerHTML='';
+  document.getElementById('incomeRows').innerHTML = '';
+  document.getElementById('vehicleRows').innerHTML = '';
   addIncomeRow(0,'none','본인');
   addVehicleRow();
   ['propertyIncome','publicTransfer','privateTransfer','hhExpense','housingProperty','generalProperty','financialProperty','debt'].forEach(id=>{
-    document.getElementById(id).value=0;
+    document.getElementById(id).value = 0;
   });
-  document.getElementById('hhSize').value=3;
-  document.getElementById('region').value='metro';
-  document.getElementById('dutyHasCapacity').checked=false;
-  document.getElementById('result').style.display='none';
+  document.getElementById('hhSize').value = 3;
+  document.getElementById('region').value = 'metro';
+  document.getElementById('dutyRows').innerHTML = '';
+  document.getElementById('dutyEnable').checked = true;
+  document.getElementById('dutyVulnerable').checked = false;
+  document.getElementById('result').style.display = 'none';
+  syncRegionHint();
 }
 
 function fillSample(){
-  document.getElementById('incomeRows').innerHTML='';
-  document.getElementById('vehicleRows').innerHTML='';
-  document.getElementById('hhSize').value=3;
-  document.getElementById('region').value='other';
+  document.getElementById('incomeRows').innerHTML = '';
+  document.getElementById('vehicleRows').innerHTML = '';
+  document.getElementById('hhSize').value = 3;
+  document.getElementById('region').value = 'other';
   addIncomeRow(900000,'none','본인');
-  addIncomeRow(0,'none','배우자');
-  document.getElementById('propertyIncome').value=0;
-  document.getElementById('publicTransfer').value=300000;
-  document.getElementById('privateTransfer').value=0;
-  document.getElementById('hhExpense').value=100000;
-  document.getElementById('housingProperty').value=45000000;
-  document.getElementById('generalProperty').value=0;
-  document.getElementById('financialProperty').value=3000000;
-  document.getElementById('debt').value=5000000;
-  addVehicleRow(1600,3000000,true,'general');
-  document.getElementById('dutyHasCapacity').checked=false;
+  addIncomeRow(700000,'young','자녀(대학생)');
+  document.getElementById('propertyIncome').value = 0;
+  document.getElementById('publicTransfer').value = 300000;
+  document.getElementById('privateTransfer').value = 0;
+  document.getElementById('hhExpense').value = 100000;
+  document.getElementById('housingProperty').value = 45000000;
+  document.getElementById('generalProperty').value = 0;
+  document.getElementById('financialProperty').value = 3000000;
+  document.getElementById('debt').value = 5000000;
+  addVehicleRow('car',1600,3000000,true,'general');
+  document.getElementById('dutyRows').innerHTML = '';
+  document.getElementById('dutyEnable').checked = true;
+  document.getElementById('dutyVulnerable').checked = true;
+  addDutyRow('장남', 3, 'other');
+  document.getElementById('dIncome_'+dutyRowId).value = 4200000;
+  document.getElementById('dHousing_'+dutyRowId).value = 180000000;
+  document.getElementById('dFinancial_'+dutyRowId).value = 20000000;
+  document.getElementById('dDebt_'+dutyRowId).value = 60000000;
+  syncRegionHint();
 }
 
 function resetSettings(){
   buildMedianGrid();
-  document.getElementById('rLivelihood').value=32;
-  document.getElementById('rMedical').value=40;
-  document.getElementById('rHousing').value=48;
-  document.getElementById('rEducation').value=50;
-  document.getElementById('rNearPoor').value=50;
-  document.getElementById('rSingleParent').value=63;
-  document.getElementById('rYouthSingleParent').value=65;
-  document.getElementById('dedSeoul').value=99000000;
-  document.getElementById('dedGyeonggi').value=80000000;
-  document.getElementById('dedMetro').value=77000000;
-  document.getElementById('dedOther').value=53000000;
-  document.getElementById('rateHousing').value=1.04;
-  document.getElementById('rateGeneral').value=4.17;
-  document.getElementById('rateFinancial').value=6.26;
-  document.getElementById('rateCar').value=100;
-  document.getElementById('rateCarReduced').value=4.17;
-  document.getElementById('finBasicDeduction').value=5000000;
-  document.getElementById('laborBaseRate').value=30;
-  document.getElementById('studentFlat').value=400000;
-  document.getElementById('youthFlat').value=600000;
+  document.getElementById('rLivelihood').value = 32;
+  document.getElementById('rMedical').value = 40;
+  document.getElementById('rHousing').value = 48;
+  document.getElementById('rEducation').value = 50;
+  document.getElementById('rNearPoor').value = 50;
+  document.getElementById('rSingleParent').value = 63;
+  document.getElementById('rYouthSingleParent').value = 65;
+  document.getElementById('dedSeoul').value = 99000000;
+  document.getElementById('dedGyeonggi').value = 80000000;
+  document.getElementById('dedMetro').value = 77000000;
+  document.getElementById('dedOther').value = 53000000;
+  document.getElementById('capSeoul').value = 172000000;
+  document.getElementById('capGyeonggi').value = 151000000;
+  document.getElementById('capMetro').value = 146000000;
+  document.getElementById('capOther').value = 112000000;
+  document.getElementById('rateHousing').value = 1.04;
+  document.getElementById('rateGeneral').value = 4.17;
+  document.getElementById('rateFinancial').value = 6.26;
+  document.getElementById('rateCar').value = 100;
+  document.getElementById('finBasicDeduction').value = 5000000;
+  document.getElementById('laborBaseRate').value = 30;
+  document.getElementById('youthFlat').value = 600000;
+  document.getElementById('seniorFlat').value = 200000;
+  document.getElementById('rehabRate').value = 50;
+  document.getElementById('dDedSeoul').value = 364000000;
+  document.getElementById('dDedGyeonggi').value = 294000000;
+  document.getElementById('dDedMetro').value = 283000000;
+  document.getElementById('dDedOther').value = 195000000;
+  document.getElementById('dRateHousing').value = 1.04;
+  document.getElementById('dRateGeneral').value = 2.08;
+  document.getElementById('dRateA').value = 40;
+  document.getElementById('dRateB').value = 100;
+  document.getElementById('dRateSoft').value = 74;
+  document.getElementById('dRateProp').value = 18;
+  syncRegionHint();
 }
 
 /* ---------------- 초기 로드 ---------------- */
 buildMedianGrid();
 addIncomeRow(0,'none','본인');
 addVehicleRow();
+syncRegionHint();
 </script>
 </body>
 </html>
