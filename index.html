@@ -237,6 +237,32 @@
     <div class="actions"><button class="btn-add" onclick="addDutyRow()">+ 부양의무자 가구 추가</button></div>
   </div>
 
+  <!-- 차상위 세부유형 · 자산형성지원사업 -->
+  <div class="card">
+    <h2>⑥ 차상위 세부유형 · 자산형성지원사업</h2>
+    <p class="sub">아래 항목은 소득인정액 판정기준(중위소득 50%)에는 영향을 주지 않고, 어떤 차상위 세부사업·자산형성지원사업에 해당하는지 안내하는 용도입니다.</p>
+
+    <label class="chk"><input type="checkbox" id="nearWorkAble"> 근로능력이 있어 자활사업 참여가 가능함 (<b>차상위자활</b> 대상)</label>
+    <label class="chk" style="margin-top:8px;"><input type="checkbox" id="nearMedicalTarget"> 희귀난치성·중증질환자, 만성질환자(6개월 이상 치료) 또는 18세 미만 아동임 (<b>차상위 본인부담경감</b> 대상)</label>
+    <div class="hint" style="margin:6px 0 14px;">
+      차상위계층확인·차상위자활·차상위본인부담경감은 모두 <b>소득인정액이 기준 중위소득 50% 이하</b>이면 해당하고 <b>부양의무자 기준이 적용되지 않습니다</b>.
+      위 체크박스는 판정표에 해당 세부사업명을 함께 표시하기 위한 것으로, 실제 대상자 여부(질환 진단, 자활사업 참여 의사 등)는 관할 기관에서 별도 확인합니다.
+    </div>
+
+    <h3 class="mini">자산형성지원사업 (희망저축계좌Ⅰ·Ⅱ, 청년내일저축계좌)</h3>
+    <div class="grid">
+      <div class="field">
+        <label>신청(가입) 대표자 연령(만 나이)</label>
+        <input type="number" id="assetAge" min="0" max="120" value="30">
+      </div>
+    </div>
+    <div class="hint">
+      ② 소득 정보에서 입력한 가구 전체 근로·사업소득 합계를 그대로 사용합니다. 청년내일저축계좌는 만 15~34세(국민기초생활수급자·차상위자는
+      만 39세까지 확대)이고 가구 근로·사업소득 합계가 월 10만원 이상이어야 하며, 희망저축계좌Ⅰ·Ⅱ도 가구에 근로·사업소득이 있어야 합니다.
+      자산형성지원사업 총재산기준은 "기준값 설정"에서 확인·수정하세요(2026년 지역별 정확한 금액은 관할 기관에서 재확인 필요).
+    </div>
+  </div>
+
   <button class="btn-primary" onclick="calculate()">판정 결과 계산하기</button>
   <div class="actions" style="margin:10px 0 0;justify-content:center;">
     <button class="btn-ghost" onclick="fillSample()">예시 값 채우기</button>
@@ -279,6 +305,24 @@
         </table>
       </div>
       <div id="dutyDetail" class="breakdown" style="margin-top:14px;"></div>
+    </div>
+
+    <div class="card">
+      <h2>차상위 세부사업 · 자산형성지원사업 판정</h2>
+      <p class="sub">소득인정액 50% 이하 시 아래 차상위 세부사업에 해당하며, 자산형성지원사업은 근로·사업소득·연령·재산 요건을 함께 판정합니다.</p>
+      <div class="tablewrap">
+        <table id="nearPoorTable">
+          <thead><tr><th>세부사업</th><th>기준</th><th>판정</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="tablewrap" style="margin-top:14px;">
+        <table id="assetTable">
+          <thead><tr><th>자산형성지원사업</th><th>핵심 요건</th><th>판정</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div id="assetDetail" class="breakdown" style="margin-top:10px;"></div>
     </div>
 
     <div class="card">
@@ -351,6 +395,18 @@
         <div class="field"><label>재산특례액 (순재산 기준)</label><input type="number" id="propExemptCap" value="85000000"></div>
       </div>
       <div class="hint">2024년 사업안내상 대도시 기준 참고값입니다. 지역별 최신 금액은 관할 행정복지센터 또는 최신 사업안내에서 확인 후 수정하시기 바랍니다. 금융재산 한도는 위 지역별 기본재산액을 그대로 사용합니다.</div>
+
+      <h3 class="mini">자산형성지원사업 기준</h3>
+      <div class="grid">
+        <div class="field"><label>가입 소득기준 비율 (기준 중위소득 대비, %)</label><input type="number" id="assetIncomeRate" value="50" step="0.1"></div>
+        <div class="field"><label>희망저축계좌Ⅰ 근로소득 하한 비율 (기준중위소득 40%의 %)</label><input type="number" id="assetHope1Rate" value="60" step="0.1"></div>
+        <div class="field"><label>가구 근로·사업소득 최소액 (원)</label><input type="number" id="assetMinIncome" value="100000"></div>
+        <div class="field"><label>총재산기준 (원)</label><input type="number" id="assetPropertyCap" value="350000000"></div>
+        <div class="field"><label>청년내일저축계좌 연령 상한 (일반, 만 세)</label><input type="number" id="assetYouthAgeMax" value="34"></div>
+        <div class="field"><label>청년내일저축계좌 연령 상한 (수급자·차상위, 만 세)</label><input type="number" id="assetYouthAgeMaxVulnerable" value="39"></div>
+        <div class="field"><label>청년내일저축계좌 연령 하한 (만 세)</label><input type="number" id="assetYouthAgeMin" value="15"></div>
+      </div>
+      <div class="hint">총재산기준은 2020년대 대도시 기준 참고값(약 3.5억원)입니다. 지역별 정확한 최신 금액은 자산형성포털(hope.welfareinfo.or.kr) 또는 관할 행정복지센터에서 확인 후 수정하시기 바랍니다.</div>
 
       <h3 class="mini">부양의무자 기본재산액 (지역별, 원)</h3>
       <div class="grid">
@@ -431,6 +487,21 @@
       · 65세 이상 노인, 중증장애인 등 근로무능력자로만 구성되고 재산 처분이 곤란한 가구로서, 순재산가액(부채 차감 후)이 재산특례액 이하이고
         금융재산이 지역 기본재산액 이하이며 월 100% 환산율이 적용되는 자동차가 없으면 재산 전체를 소득환산에서 제외</p>
 
+      <p><b>8. 차상위 세부사업 (차상위계층확인·차상위자활·차상위 본인부담경감)</b><br>
+      · 세 사업 모두 소득인정액이 기준 중위소득 50% 이하이면 공통으로 해당하고, <b>부양의무자 기준은 적용되지 않음</b>(별도의 재산기준도 없이
+        동일한 소득인정액 산식을 사용)<br>
+      · 차상위자활은 근로능력이 있어 자활사업 참여가 가능한 사람, 차상위 본인부담경감은 희귀난치성·중증질환자, 만성질환자(6개월 이상 치료 중이거나
+        필요), 18세 미만 아동이 대상이며, 실제 대상자 확인(질환 진단서, 자활사업 참여 의사 등)은 관할 기관에서 별도로 판단</p>
+
+      <p><b>9. 자산형성지원사업 (희망저축계좌Ⅰ·Ⅱ, 청년내일저축계좌)</b><br>
+      · 희망저축계좌Ⅰ: 생계급여 또는 의료급여 수급 가구로서 가구 전체 근로·사업소득이 기준 중위소득 40%의 60% 이상, 총재산이 재산기준 이하<br>
+      · 희망저축계좌Ⅱ: 생계·의료급여 수급자가 아니면서 주거·교육급여 수급 또는 차상위계층에 해당하고, 가구에 근로·사업소득이 있으며 총재산이
+        재산기준 이하<br>
+      · 청년내일저축계좌: 신청일 기준 만 15~34세(국민기초생활수급자·차상위계층은 만 39세까지 확대), 가구 근로·사업소득이 월 10만원 이상,
+        가입 시 소득인정액이 기준 중위소득 50% 이하(가입 후에는 매년 조사에서 최대 100%까지 유지 가능), 총재산이 재산기준 이하<br>
+      · 세 사업 모두 정확한 지역별 총재산기준과 매년 변경되는 소득 요건은 자산형성포털(hope.welfareinfo.or.kr) 또는 관할 행정복지센터에서
+        재확인이 필요</p>
+
       <p style="margin-top:10px;">※ 실제 조사에서는 재산의 세부 항목(분양권·조합원입주권 등), 근로능력 판정,
       자동차 보유 한도에 대한 지방생활보장위원회 심의, 부양비 산정의 세부 조정 등 추가 변수가 반영됩니다.
       이 도구는 대표적인 산식을 반영한 추정 계산기입니다.</p>
@@ -444,7 +515,8 @@
   보건복지부 「2026년 국민기초생활보장 사업안내」(근로소득공제 105~106쪽, 주거용재산 한도액 134쪽, 자동차 152~155쪽, 부채 차감 164쪽, 기본재산액 165쪽,
   부양의무자 재산의 소득환산제 194쪽, 부양능력 판정 기본개념·부양비 196쪽, 부양의무자 기준 미적용·완화 특례, 재산범위 특례),
   여성가족부 「2026년 한부모가족지원사업 안내」, 보건복지부 보도자료(2026.7.28. 제80차 중앙생활보장위원회, 2027년도 기준 중위소득 6.70% 인상,
-  생계급여 고소득·고재산 부양의무자 예외조항 2027년까지 단계적 폐지 계획).</p>
+  생계급여 고소득·고재산 부양의무자 예외조항 2027년까지 단계적 폐지 계획), 보건복지부 「차상위계층확인·차상위자활·차상위 본인부담경감대상자
+  선정기준」, 보건복지부 「2026년 자활사업안내(자산형성지원 통장사업 안내)」(희망저축계좌Ⅰ·Ⅱ, 청년내일저축계좌 가입·유지 기준).</p>
   <p>2027년 기준 중위소득은 관보 고시를 거쳐 2027년 1월 1일부터 적용됩니다. 급여별 선정기준 비율은 2026년과 동일합니다.
   생계급여 고소득·고재산 기준(연소득 1억3,000만원/재산 12억원), 부양의무자 완전면제 특례, 재산범위 특례액 등은 매년 조정될 수 있으므로
   최신 수치는 보건복지부(www.mohw.go.kr) 및 관할 행정복지센터를 통해 확인하시기 바랍니다.</p>
@@ -905,7 +977,7 @@ function incomeEvaluation(){
   const totalEvaluated = (laborTotal-laborDeductedTotal)+propertyIncome+publicTransfer+privateTransfer;
   return {
     incomeAssessment: Math.max(0, totalEvaluated-hhExpense),
-    propertyIncome, publicTransfer, privateTransfer, hhExpense, details
+    laborTotal, propertyIncome, publicTransfer, privateTransfer, hhExpense, details
   };
 }
 
@@ -944,6 +1016,7 @@ function calculate(){
 
   let basicRecipient = false;
   const qualifiedBenefits = [];
+  const passMap = {};
   const tbody = document.querySelector('#resultTable tbody');
   tbody.innerHTML = '';
   rows.forEach(r=>{
@@ -963,6 +1036,7 @@ function calculate(){
       basicRecipient = true;
       qualifiedBenefits.push(r.key);
     }
+    passMap[r.key] = pass;
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${r.label}</td>
@@ -975,6 +1049,7 @@ function calculate(){
   });
 
   renderDuty(duty, median);
+  renderNearPoorAndAsset(passMap, median, hhSize, inc, prop);
 
   const summaryBox = document.getElementById('summaryBox');
   if(basicRecipient){
@@ -1116,6 +1191,73 @@ function renderDuty(duty, A){
   document.getElementById('dutyDetail').innerHTML = bd;
 }
 
+/* ---------------- 차상위 세부사업 · 자산형성지원사업 ---------------- */
+function renderNearPoorAndAsset(passMap, median, hhSize, inc, prop){
+  const nearPoorPass = passMap['차상위계층'];
+  const workAble = document.getElementById('nearWorkAble').checked;
+  const medicalTarget = document.getElementById('nearMedicalTarget').checked;
+
+  const npTbody = document.querySelector('#nearPoorTable tbody');
+  npTbody.innerHTML = '';
+  const npRows = [
+    {label:'차상위계층확인', need:'기준 중위소득 50% 이하 (부양의무자 기준 미적용)', pass: nearPoorPass},
+    {label:'차상위자활', need:'중위소득 50% 이하 + 근로능력 있음(⑥ 체크박스)', pass: nearPoorPass && workAble},
+    {label:'차상위 본인부담경감', need:'중위소득 50% 이하 + 희귀난치성·중증·만성질환자 또는 18세 미만 아동(⑥ 체크박스)', pass: nearPoorPass && medicalTarget}
+  ];
+  npRows.forEach(r=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${r.label}</td>
+      <td>${r.need}</td>
+      <td><span class="pill ${r.pass?'ok':'no'}">${r.pass?'적합(해당)':'부적합(해당없음)'}</span></td>
+    `;
+    npTbody.appendChild(tr);
+  });
+
+  // 자산형성지원사업 (희망저축계좌Ⅰ·Ⅱ, 청년내일저축계좌)
+  const age = num('assetAge');
+  const laborTotal = inc.laborTotal;
+  const hasLaborIncome = laborTotal >= num('assetMinIncome');
+  const totalAssetValue = num('housingProperty') + num('generalProperty') + num('financialProperty')
+    + prop.vehicles.reduce((s,v)=>s+v.value, 0);
+  const assetCap = num('assetPropertyCap');
+  const assetOk = totalAssetValue <= assetCap;
+
+  const isRecipientOrNearPoor = passMap['생계급여'] || passMap['의료급여'] || passMap['주거급여'] || passMap['교육급여'] || nearPoorPass;
+  const youthAgeMax = isRecipientOrNearPoor ? num('assetYouthAgeMaxVulnerable') : num('assetYouthAgeMax');
+  const youthAgeMin = num('assetYouthAgeMin');
+  const ageOk = age >= youthAgeMin && age <= youthAgeMax;
+  const incomeGate = median * (num('assetIncomeRate')/100);
+  const incomeOk = (inc.incomeAssessment + prop.total) <= incomeGate;
+
+  const hope1IncomeFloor = median * 0.4 * (num('assetHope1Rate')/100);
+  const hope1 = (passMap['생계급여'] || passMap['의료급여']) && hasLaborIncome && laborTotal >= hope1IncomeFloor && assetOk;
+  const hope2 = !(passMap['생계급여'] || passMap['의료급여']) && (passMap['주거급여'] || passMap['교육급여'] || nearPoorPass) && hasLaborIncome && assetOk;
+  const youth = ageOk && hasLaborIncome && incomeOk && assetOk;
+
+  const assetTbody = document.querySelector('#assetTable tbody');
+  assetTbody.innerHTML = '';
+  const assetRows = [
+    {label:'희망저축계좌Ⅰ', need:`생계·의료급여 수급 + 가구 근로·사업소득 ${fmt(hope1IncomeFloor)} 이상 + 총재산 ${fmt(assetCap)} 이하`, pass: hope1},
+    {label:'희망저축계좌Ⅱ', need:`주거·교육급여 또는 차상위계층 + 근로·사업소득 있음 + 총재산 ${fmt(assetCap)} 이하`, pass: hope2},
+    {label:'청년내일저축계좌', need:`만 ${youthAgeMin}~${youthAgeMax}세 + 근로·사업소득 있음 + 소득인정액 ${fmt(incomeGate)} 이하 + 총재산 ${fmt(assetCap)} 이하`, pass: youth}
+  ];
+  assetRows.forEach(r=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${r.label}</td>
+      <td>${r.need}</td>
+      <td><span class="pill ${r.pass?'ok':'no'}">${r.pass?'적합(해당)':'부적합(해당없음)'}</span></td>
+    `;
+    assetTbody.appendChild(tr);
+  });
+
+  let bd = `가구 근로·사업소득 합계 ${fmt(laborTotal)}, 신청 대표자 연령 만 ${age}세, 총재산(주거용+일반+금융+자동차 전체) ${fmt(totalAssetValue)} (기준 ${fmt(assetCap)})<br>`;
+  bd += `청년내일저축계좌 연령 범위: 만 ${youthAgeMin}~${youthAgeMax}세 (${isRecipientOrNearPoor?'국민기초생활수급자·차상위자 확대 기준 적용':'일반 기준'}), 가입 소득인정액 기준 ${fmt(incomeGate)}(소득인정액 ${fmt(inc.incomeAssessment+prop.total)})<br>`;
+  bd += `희망저축계좌Ⅰ 근로·사업소득 하한 = 기준중위소득 40%(${fmt(median*0.4)})의 ${num('assetHope1Rate')}% = ${fmt(hope1IncomeFloor)}`;
+  document.getElementById('assetDetail').innerHTML = bd;
+}
+
 /* ---------------- 초기화 · 예시 · 기준값 재설정 ---------------- */
 function resetAll(){
   document.getElementById('incomeRows').innerHTML = '';
@@ -1132,6 +1274,9 @@ function resetAll(){
   document.getElementById('dutyEnable').checked = true;
   document.getElementById('dutyHhElderlyDisabled').checked = false;
   document.getElementById('dutyVulnerable').checked = false;
+  document.getElementById('nearWorkAble').checked = false;
+  document.getElementById('nearMedicalTarget').checked = false;
+  document.getElementById('assetAge').value = 30;
   document.getElementById('result').style.display = 'none';
   syncRegionHint();
 }
@@ -1163,6 +1308,9 @@ function fillSample(){
   document.getElementById('dHousing_'+dutyRowId).value = 180000000;
   document.getElementById('dFinancial_'+dutyRowId).value = 20000000;
   document.getElementById('dDebt_'+dutyRowId).value = 60000000;
+  document.getElementById('nearWorkAble').checked = true;
+  document.getElementById('nearMedicalTarget').checked = false;
+  document.getElementById('assetAge').value = 22;
   syncRegionHint();
 }
 
@@ -1205,6 +1353,13 @@ function resetSettings(){
   document.getElementById('dRateB').value = 100;
   document.getElementById('dRateSoft').value = 74;
   document.getElementById('dRateProp').value = 18;
+  document.getElementById('assetIncomeRate').value = 50;
+  document.getElementById('assetHope1Rate').value = 60;
+  document.getElementById('assetMinIncome').value = 100000;
+  document.getElementById('assetPropertyCap').value = 350000000;
+  document.getElementById('assetYouthAgeMax').value = 34;
+  document.getElementById('assetYouthAgeMaxVulnerable').value = 39;
+  document.getElementById('assetYouthAgeMin').value = 15;
   syncRegionHint();
 }
 
