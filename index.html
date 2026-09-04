@@ -66,6 +66,7 @@
   .pill{display:inline-block;padding:3px 11px;border-radius:20px;font-size:12.5px;font-weight:700;}
   .pill.ok{background:var(--ok-bg);color:var(--ok-fg);}
   .pill.no{background:var(--no-bg);color:var(--no-fg);}
+  .pill.warn{background:var(--warn-bg);color:var(--warn-fg);}
   .summaryBox{border-radius:10px;padding:16px 18px;margin-bottom:16px;font-size:14px;}
   .summaryBox.ok{background:var(--ok-bg);border:1px solid #b7e6c7;color:var(--ok-fg);}
   .summaryBox.no{background:var(--no-bg);border:1px solid #f3c8c4;color:var(--no-fg);}
@@ -187,6 +188,13 @@
         <div class="hint">금융회사 대출금, 임대보증금 부채, 법원에 의해 확인된 사채 등</div>
       </div>
     </div>
+
+    <label class="chk" style="margin-top:14px;"><input type="checkbox" id="propExemptToggle"> 재산범위 특례 검토 (가구원 전원이 근로무능력자 &amp; 재산 처분이 곤란한 가구)</label>
+    <div class="hint" style="margin:6px 0 0;">
+      65세 이상 노인·중증장애인·장기입원 환자 등 <b>근로무능력자로만 구성된 가구</b>로서, 순재산가액(부채 차감 후)이 재산특례액 이하이고
+      금융재산이 지역 기본재산액 이하이며 월 100% 환산율이 적용되는 자동차가 없으면 <b>재산 전체를 소득환산에서 제외</b>합니다.
+      (재산특례액은 "기준값 설정"에서 확인·수정, 최신 고시액을 관할 행정복지센터에서 재확인하시기 바랍니다.)
+    </div>
   </div>
 
   <!-- 자동차 정보 -->
@@ -203,17 +211,27 @@
 
   <!-- 부양의무자 -->
   <div class="card">
-    <h2>⑤ 부양의무자 (의료급여 판정용)</h2>
-    <p class="sub">의료급여는 부양의무자 기준이 유지됩니다. 부양의무자 가구를 하나씩 등록하면 소득기준과 재산기준을 함께 판정합니다.</p>
+    <h2>⑤ 부양의무자 (생계급여 예외조항·의료급여 판정용)</h2>
+    <p class="sub">
+      생계·주거·교육급여는 부양의무자 기준이 폐지되었으나, <b>생계급여는 고소득·고재산 부양의무자 예외조항</b>이 남아있고
+      <b>의료급여는 부양능력 판정(없음·미약·있음 3단계)</b>이 유지됩니다. 부양의무자 가구를 하나씩 등록하세요.
+    </p>
 
     <label class="chk"><input type="checkbox" id="dutyEnable" checked> 부양의무자 판정 포함</label>
     <div class="hint" style="margin:6px 0 14px;">
-      부양의무자는 1촌의 직계혈족(부모·자녀) 및 그 배우자입니다. <b>한 명이라도 부양능력이 있으면 의료급여 수급자에서 제외</b>됩니다.
-      수급(권)자가 30세 미만 한부모·자립준비청년이거나 부양의무자가 기초연금 수급자·중증장애인인 경우 등은 부양의무자 기준이 적용되지 않으므로 등록하지 마십시오.
+      부양의무자는 1촌의 직계혈족(부모·자녀) 및 그 배우자입니다. 의료급여는 <b>한 명이라도 부양능력 '있음'이면 수급자에서 제외</b>되고,
+      '미약'으로 판정된 부양의무자는 부양비(판정소득액이 B 초과분의 10%)가 수급(권)자 가구 소득에 합산됩니다.
+      수급(권)자가 30세 미만 한부모가구·자립준비청년(보호종료아동)인 경우는 부양의무자 기준 자체가 적용되지 않으므로 등록하지 마십시오.
     </div>
 
-    <label class="chk"><input type="checkbox" id="dutyVulnerable"> 수급(권)자 가구가 노인·장애인·한부모 등 취약계층 (완화된 소득기준 적용)</label>
-    <div class="hint" style="margin:6px 0 14px;">완화 적용 시 소득기준은 (A×40%)+(B×100%)와 (A+B)×74% 중 더 높은 값을 적용합니다.</div>
+    <label class="chk"><input type="checkbox" id="dutyHhElderlyDisabled"> 수급(권)자 가구에 65세 이상 노인 또는 장애정도가 심한 장애인(중증)이 포함됨</label>
+    <div class="hint" style="margin:6px 0 14px;">
+      이 항목과 각 부양의무자 행의 "기초연금·장애인연금 수급자 포함" 조건을 <b>모두</b> 충족하는 부양의무자는 의료급여 부양의무자 기준이
+      완전히 미적용(부양능력 '없음' 처리)됩니다. 20세 이하 1·2·3급 중복 등록장애인이 포함된 부양의무자는 이 조건과 무관하게 항상 미적용됩니다.
+    </div>
+
+    <label class="chk"><input type="checkbox" id="dutyVulnerable"> 수급(권)자 가구가 노인·경증(심하지 않은) 장애인·한부모 등 취약계층 (소득기준 74% 완화만 적용, 완전면제 아님)</label>
+    <div class="hint" style="margin:6px 0 14px;">완화 적용 시 소득기준은 (A×40%)+(B×100%)와 (A+B)×74% 중 더 높은 값을 적용합니다. 위 완전면제 조건과는 별개입니다.</div>
 
     <div id="dutyRows"></div>
     <div class="actions"><button class="btn-add" onclick="addDutyRow()">+ 부양의무자 가구 추가</button></div>
@@ -256,7 +274,7 @@
       <h2>부양의무자 부양능력 판정 (의료급여)</h2>
       <div class="tablewrap">
         <table id="dutyTable">
-          <thead><tr><th>부양의무자 가구</th><th>부양능력 판정소득액</th><th>소득기준</th><th>재산의 소득환산액</th><th>재산기준</th><th>판정</th></tr></thead>
+          <thead><tr><th>부양의무자 가구</th><th>부양능력 판정소득액</th><th>소득기준</th><th>재산의 소득환산액</th><th>재산기준</th><th>판정</th><th>부양비</th><th>생계급여 고소득·고재산</th></tr></thead>
           <tbody></tbody>
         </table>
       </div>
@@ -320,6 +338,20 @@
         <div class="field"><label>노인·장애인 등 정액공제 (원)</label><input type="number" id="seniorFlat" value="200000"></div>
         <div class="field"><label>직업재활사업 참여소득 추가공제율 (%)</label><input type="number" id="rehabRate" value="50" step="0.1"></div>
       </div>
+
+      <h3 class="mini">생계급여 고소득·고재산 부양의무자 예외조항</h3>
+      <div class="grid">
+        <div class="field"><label>고소득 기준 (부양의무자 연소득, 원)</label><input type="number" id="slHighIncome" value="130000000"></div>
+        <div class="field"><label>고재산 기준 (부양의무자 재산, 금융재산 제외, 원)</label><input type="number" id="slHighAsset" value="1200000000"></div>
+      </div>
+      <div class="hint">2025.1. 상향된 기준(연소득 1.3억원/재산 12억원)입니다. 정부는 이 조항을 2027년까지 단계적으로 폐지할 예정이므로 최신 시행 여부를 확인하시기 바랍니다.</div>
+
+      <h3 class="mini">재산범위 특례 (근로무능력자 가구, 원)</h3>
+      <div class="grid">
+        <div class="field"><label>재산특례액 (순재산 기준)</label><input type="number" id="propExemptCap" value="85000000"></div>
+      </div>
+      <div class="hint">2024년 사업안내상 대도시 기준 참고값입니다. 지역별 최신 금액은 관할 행정복지센터 또는 최신 사업안내에서 확인 후 수정하시기 바랍니다. 금융재산 한도는 위 지역별 기본재산액을 그대로 사용합니다.</div>
+
       <h3 class="mini">부양의무자 기본재산액 (지역별, 원)</h3>
       <div class="grid">
         <div class="field"><label>서울특별시</label><input type="number" id="dDedSeoul" value="364000000"></div>
@@ -375,20 +407,32 @@
       · 그 밖의 자동차는 월 100% 적용</p>
 
       <p><b>4. 판정</b> = 소득인정액 ≤ (가구원 수별 기준 중위소득 × 급여·제도별 선정기준 비율)</p>
-      <p><b>5. 부양의무자 부양능력 판정 (의료급여)</b><br>
+      <p><b>5. 부양의무자 부양능력 판정 (의료급여, 없음·미약·있음 3단계)</b><br>
       · A = 수급(권)자 가구의 기준 중위소득, B = 부양의무자 가구의 기준 중위소득<br>
-      · 부양능력 없음: 소득기준과 재산기준을 <b>동시에</b> 충족 — 부양능력 판정소득액 &lt; (A×40%)+(B×100%) 이고, 재산의 소득환산액 &lt; (A+B)×18%<br>
-      · 부양능력 있음: 소득기준·재산기준 중 <b>하나만 초과해도</b> 있음으로 판정<br>
-      · 수급(권)자가 노인·장애인·한부모 등 취약계층이면 소득기준은 (A×40%)+(B×100%)와 (A+B)×74% 중 더 높은 값을 적용<br>
+      · 부양능력 없음: 판정소득액 &lt; B×100% 이고, 재산의 소득환산액 &lt; (A+B)×18%<br>
+      · 부양능력 미약: 판정소득액이 B×100% 이상이면서 (A×40%)+(B×100%) 미만이고, 재산의 소득환산액 &lt; (A+B)×18% —
+        이 경우 <b>부양비 = (판정소득액 − B×100%) × 10%</b>를 수급(권)자 가구의 의료급여 판정용 소득에 가산(다른 급여에는 미반영)<br>
+      · 부양능력 있음: 판정소득액 ≥ (A×40%)+(B×100%) 이거나 재산의 소득환산액 ≥ (A+B)×18% — <b>하나만 초과해도</b> 있음으로 판정, 한 명이라도 있으면 의료급여 수급자에서 제외<br>
+      · 수급(권)자가 노인·장애인·한부모 등 취약계층이면 소득기준(있음/미약 경계)은 (A×40%)+(B×100%)와 (A+B)×74% 중 더 높은 값을 적용<br>
+      · 부양의무자 기준 완전 미적용(부양능력 없음으로 간주): (1) 수급(권)자 가구에 노인(65세 이상) 또는 장애정도가 심한 장애인이 있고, 동시에 부양의무자 가구에 기초연금 수급자 또는 장애인연금 수급자(중증장애인)가 있는 경우, (2) 부양의무자 가구에 20세 이하 1·2·3급 중복 등록장애인이 있는 경우<br>
+      · 경증(장애정도가 심하지 않은) 장애인이 포함된 가구는 완전 면제 대상이 아니며, 취약계층 소득기준 완화(74%)만 적용됨<br>
       · 부양의무자 기본재산액: 서울 3억6,400만원, 경기 2억9,400만원, 광역·세종·창원 2억8,300만원, 그 외 1억9,500만원<br>
       · 부양의무자 재산의 소득환산율: 주거용재산 월 1.04%, 일반재산·금융재산·자동차·기타 산정되는 재산 월 2.08%<br>
       · 부양의무자가 장애의 정도가 심한 등록장애인(상이등급 1~3급 포함)인 경우 본인 명의 장애인사용자동차 1대는 재산가액 산정에서 제외하고, 그 밖의 자동차는 일반재산 환산율 적용<br>
-      · 금융재산에서 생활준비금 500만원 공제(장기저축은 미적용), 부채 차감은 수급(권)자와 동일<br>
-      · 부양의무자가 한 명이라도 부양능력이 있으면 의료급여 수급자에서 제외</p>
+      · 금융재산에서 생활준비금 500만원 공제(장기저축은 미적용), 부채 차감은 수급(권)자와 동일</p>
 
+      <p><b>6. 생계급여 고소득·고재산 부양의무자 예외조항</b><br>
+      · 생계·주거·교육급여는 부양의무자 기준이 원칙적으로 폐지되었으나, <b>생계급여</b>에는 예외가 남아있음<br>
+      · 부양의무자의 연소득(세전)이 1억3,000만원 이상이거나, 재산(금융재산 제외)이 12억원 이상이면 그 사실만으로 생계급여 선정기준에서 제외<br>
+      · 이 예외조항은 의료급여 부양능력 판정과 독립적으로 적용되며, 의료급여·주거급여·교육급여·차상위계층·한부모가족 판정에는 영향을 주지 않음<br>
+      · 정부는 이 조항을 2027년까지(중증장애인·노인 순으로) 단계적으로 폐지할 예정</p>
 
-      <p style="margin-top:10px;">※ 실제 조사에서는 재산의 세부 항목(분양권·조합원입주권 등), 재산범위 특례, 근로능력 판정,
-      의료급여 부양의무자의 소득·재산, 자동차 보유 한도에 대한 지방생활보장위원회 심의 등 추가 변수가 반영됩니다.
+      <p><b>7. 재산범위 특례 (근로무능력자 가구)</b><br>
+      · 65세 이상 노인, 중증장애인 등 근로무능력자로만 구성되고 재산 처분이 곤란한 가구로서, 순재산가액(부채 차감 후)이 재산특례액 이하이고
+        금융재산이 지역 기본재산액 이하이며 월 100% 환산율이 적용되는 자동차가 없으면 재산 전체를 소득환산에서 제외</p>
+
+      <p style="margin-top:10px;">※ 실제 조사에서는 재산의 세부 항목(분양권·조합원입주권 등), 근로능력 판정,
+      자동차 보유 한도에 대한 지방생활보장위원회 심의, 부양비 산정의 세부 조정 등 추가 변수가 반영됩니다.
       이 도구는 대표적인 산식을 반영한 추정 계산기입니다.</p>
     </div>
   </details>
@@ -397,9 +441,12 @@
 
 <footer>
   <p><b>근거 자료</b> 보건복지부 「2026년도 기준 중위소득 및 생계·의료·주거·교육급여 선정기준과 최저보장수준」 고시,
-  보건복지부 「2026년 국민기초생활보장 사업안내」(근로소득공제 105~106쪽, 주거용재산 한도액 134쪽, 자동차 152~155쪽, 부채 차감 164쪽, 기본재산액 165쪽, 부양의무자 재산의 소득환산제 194쪽, 부양능력 판정 기본개념 196쪽),
-  여성가족부 「2026년 한부모가족지원사업 안내」, 보건복지부 보도자료(2026.7.28. 제80차 중앙생활보장위원회, 2027년도 기준 중위소득 6.70% 인상).</p>
+  보건복지부 「2026년 국민기초생활보장 사업안내」(근로소득공제 105~106쪽, 주거용재산 한도액 134쪽, 자동차 152~155쪽, 부채 차감 164쪽, 기본재산액 165쪽,
+  부양의무자 재산의 소득환산제 194쪽, 부양능력 판정 기본개념·부양비 196쪽, 부양의무자 기준 미적용·완화 특례, 재산범위 특례),
+  여성가족부 「2026년 한부모가족지원사업 안내」, 보건복지부 보도자료(2026.7.28. 제80차 중앙생활보장위원회, 2027년도 기준 중위소득 6.70% 인상,
+  생계급여 고소득·고재산 부양의무자 예외조항 2027년까지 단계적 폐지 계획).</p>
   <p>2027년 기준 중위소득은 관보 고시를 거쳐 2027년 1월 1일부터 적용됩니다. 급여별 선정기준 비율은 2026년과 동일합니다.
+  생계급여 고소득·고재산 기준(연소득 1억3,000만원/재산 12억원), 부양의무자 완전면제 특례, 재산범위 특례액 등은 매년 조정될 수 있으므로
   최신 수치는 보건복지부(www.mohw.go.kr) 및 관할 행정복지센터를 통해 확인하시기 바랍니다.</p>
 </footer>
 
@@ -640,9 +687,21 @@ function addDutyRow(label='', size=2, region='other'){
           <option value="other" ${region==='other'?'selected':''}>그 외 지역</option>
         </select>
       </div>
+      <div class="field"><label>의료급여 기준 적용 특례</label>
+        <select id="dException_${id}">
+          <option value="none">해당없음 (일반 판정)</option>
+          <option value="elderly_disabled">기초연금 수급 노인 또는 장애인연금 수급 중증장애인 포함</option>
+          <option value="severe20">20세 이하 1·2·3급 중복 등록장애인 포함 (무조건 미적용)</option>
+        </select>
+        <div class="hint">"기초연금·장애인연금 수급자 포함"은 위 "수급(권)자 가구 노인·중증장애인" 체크와 함께 있어야 완전 미적용됩니다.</div>
+      </div>
       <div class="field"><label>부양능력 판정소득액 (월)</label>
         <input type="number" id="dIncome_${id}" min="0" value="0">
         <div class="hint">실제소득에서 교육비·의료비·필수 지출비용 등 차감항목을 반영한 금액</div>
+      </div>
+      <div class="field"><label>연소득 (세전, 생계급여 고소득 판정용)</label>
+        <input type="number" id="dAnnualIncome_${id}" min="0" value="0">
+        <div class="hint">부양의무자 본인의 연간 세전소득. 생계급여 고소득·고재산 부양의무자 예외조항 판정에만 사용됩니다.</div>
       </div>
       <div class="field"><label>주거용재산</label>
         <input type="number" id="dHousing_${id}" min="0" value="0">
@@ -689,8 +748,11 @@ function dutyEvaluation(A, medianTable){
   if(!rows.length) return null;
 
   const vulnerable = document.getElementById('dutyVulnerable').checked;
+  const hhElderlyDisabled = document.getElementById('dutyHhElderlyDisabled').checked;
   const rateA = num('dRateA')/100, rateB = num('dRateB')/100;
   const rateSoft = num('dRateSoft')/100, rateProp = num('dRateProp')/100;
+  const highIncomeLimit = num('slHighIncome');
+  const highAssetLimit = num('slHighAsset');
 
   const results = [];
   rows.forEach(row=>{
@@ -699,7 +761,9 @@ function dutyEvaluation(A, medianTable){
       label: document.getElementById('dLabel_'+id).value || '부양의무자',
       size: num('dSize_'+id) || 1,
       region: document.getElementById('dRegion_'+id).value,
+      exception: document.getElementById('dException_'+id).value,
       income: num('dIncome_'+id),
+      annualIncome: num('dAnnualIncome_'+id),
       housing: num('dHousing_'+id),
       general: num('dGeneral_'+id),
       financial: num('dFinancial_'+id),
@@ -713,20 +777,47 @@ function dutyEvaluation(A, medianTable){
     const propLine = (A+B)*rateProp;
 
     const prop = dutyPropertyConversion(v);
-    const incomeOver = v.income >= incomeLine;
-    const propOver = prop.conversion >= propLine;
-    const capable = incomeOver || propOver;
 
-    let reason;
-    if(!capable) reason = '소득기준·재산기준 모두 충족';
-    else if(incomeOver && propOver) reason = '소득기준·재산기준 모두 초과';
-    else if(incomeOver) reason = '소득기준 초과';
-    else reason = '재산기준 초과';
+    // 생계급여: 고소득·고재산 부양의무자 예외조항 (의료급여 판정과 별개로 독립 적용)
+    const highAssetValue = v.housing + v.general + v.car; // 금융재산 제외
+    const highIncome = v.annualIncome >= highIncomeLimit;
+    const highAsset = highAssetValue >= highAssetLimit;
 
-    results.push({v, B, incomeLine, propLine, baseLine, softLine, prop, capable, reason});
+    // 의료급여: 부양의무자 기준 완전 미적용 특례 (노인·중증장애인 조합 / 20세 이하 중복장애인)
+    const exempt = v.exception === 'severe20' || (v.exception === 'elderly_disabled' && hhElderlyDisabled);
+
+    let tier, buyangbi = 0, reason;
+    if(exempt){
+      tier = '미적용';
+      reason = v.exception==='severe20'
+        ? '20세 이하 1·2·3급 중복 등록장애인 포함: 기준 미적용'
+        : '수급(권)자 가구 노인·중증장애인 + 부양의무자 가구 기초연금·장애인연금 수급 조건 충족: 기준 미적용';
+    } else {
+      const incomeOver = v.income >= incomeLine;
+      const propOver = prop.conversion >= propLine;
+      const incomeAtLeastB = v.income >= B*rateB;
+      if(incomeOver || propOver){
+        tier = '있음';
+        reason = incomeOver && propOver ? '소득기준·재산기준 모두 초과' : (incomeOver ? '소득기준 초과' : '재산기준 초과');
+      } else if(incomeAtLeastB && !propOver){
+        tier = '미약';
+        buyangbi = Math.max(0, (v.income - B*rateB) * 0.10);
+        reason = `부양능력 미약: 부양비 ${fmt(buyangbi)}을 수급(권)자 가구 소득에 합산(의료급여 판정용)`;
+      } else {
+        tier = '없음';
+        reason = '소득기준·재산기준 모두 충족';
+      }
+    }
+
+    results.push({v, B, incomeLine, propLine, baseLine, softLine, prop, tier, buyangbi, reason, highIncome, highAsset, highAssetValue, exempt});
   });
 
-  return {results, vulnerable, anyCapable: results.some(r=>r.capable)};
+  return {
+    results, vulnerable, hhElderlyDisabled,
+    anyCapable: results.some(r=>r.tier==='있음'),
+    totalBuyangbi: results.reduce((s,r)=>s+r.buyangbi,0),
+    anyHighIncomeOrAsset: results.some(r=>r.highIncome||r.highAsset)
+  };
 }
 
 /* ---------------- 재산의 소득환산액 ---------------- */
@@ -770,8 +861,19 @@ function propertyConversion(){
   const convFin = fin*rateFinancial;
   const convVehFull = vehFullValue*rateCar;
 
+  let total = convHous+convGen+convFin+convVehFull;
+
+  // 재산범위 특례: 근로무능력자만으로 구성된 가구, 재산이 특례액 이내이고
+  // 금융재산이 지역 기본재산액 이하이며 월 100% 환산 자동차가 없으면 재산 전체를 소득환산에서 제외
+  const netPropertyForExempt = Math.max(0, housingInput+generalInput+financialInput+vehReducedValue+vehFullValue-debt);
+  const exemptEligible = document.getElementById('propExemptToggle').checked
+    && netPropertyForExempt <= num('propExemptCap')
+    && financialInput <= basicDeduction
+    && vehFullValue === 0;
+  if(exemptEligible) total = 0;
+
   return {
-    total: convHous+convGen+convFin+convVehFull,
+    total, exemptApplied: exemptEligible, netPropertyForExempt,
     convHous, convGen, convFin, convVehFull,
     housAfter:hous, genAfter:gen, finAfter:fin,
     basicDeduction, housingCap, housingExcess, finBasic, debt,
@@ -837,6 +939,8 @@ function calculate(){
   ];
 
   const duty = dutyEvaluation(median, getMedianTable());
+  const totalBuyangbi = duty ? duty.totalBuyangbi : 0;
+  const incomeRecogMedical = incomeRecog + totalBuyangbi;
 
   let basicRecipient = false;
   const qualifiedBenefits = [];
@@ -844,11 +948,16 @@ function calculate(){
   tbody.innerHTML = '';
   rows.forEach(r=>{
     const threshold = median*rates[r.key];
-    let pass = incomeRecog <= threshold;
+    const compareIncome = r.key === '의료급여' ? incomeRecogMedical : incomeRecog;
+    let pass = compareIncome <= threshold;
     let note = '';
     if(r.key === '의료급여' && pass && duty && duty.anyCapable){
       pass = false;
-      note = '부양의무자 기준 미충족';
+      note = '부양의무자 기준 초과(부양능력 있음)';
+    }
+    if(r.key === '생계급여' && pass && duty && duty.anyHighIncomeOrAsset){
+      pass = false;
+      note = '고소득·고재산 부양의무자 있음';
     }
     if(['생계급여','의료급여','주거급여','교육급여'].includes(r.key) && pass){
       basicRecipient = true;
@@ -860,7 +969,7 @@ function calculate(){
       <td>중위소득의 ${(rates[r.key]*100).toFixed(1)}%</td>
       <td>${fmt(threshold)}</td>
       <td><span class="pill ${pass?'ok':'no'}">${pass?'적합(해당)':(note||'부적합(해당없음)')}</span></td>
-      <td>${fmtSigned(threshold-incomeRecog)}</td>
+      <td>${fmtSigned(threshold-compareIncome)}</td>
     `;
     tbody.appendChild(tr);
   });
@@ -914,18 +1023,34 @@ function calculate(){
     });
   }
   bd += `<br>재산의 소득환산액 = ${fmt(prop.total)}<br>`;
-  bd += `기준 중위소득 (${currentYear()}년 ${hhSize}인 가구): <code>${fmt(median)}</code>`;
+  if(prop.exemptApplied){
+    bd += `<b>재산범위 특례 적용</b>: 근로무능력자로만 구성된 가구 요건 충족으로 재산의 소득환산액을 0원으로 처리했습니다.<br>`;
+  }
+  if(totalBuyangbi > 0){
+    bd += `<br><b>■ 부양비 반영 (의료급여 전용)</b><br>부양능력 '미약' 부양의무자의 부양비 합계 ${fmt(totalBuyangbi)}을 소득인정액에 가산 → 의료급여 판정용 소득인정액 = ${fmt(incomeRecogMedical)}<br>`;
+  }
+  bd += `<br>기준 중위소득 (${currentYear()}년 ${hhSize}인 가구): <code>${fmt(median)}</code>`;
   document.getElementById('breakdownDetail').innerHTML = bd;
 
   const dutyWarn = document.getElementById('dutyWarn');
   if(duty && duty.anyCapable){
     dutyWarn.style.display = 'block';
-    dutyWarn.innerHTML = `⚠ 부양능력이 있는 부양의무자가 있어 <b>의료급여 수급자에 해당하지 않는 것</b>으로 추정됩니다. 다만 가족관계 단절 등으로 실제 부양을 받을 수 없는 경우에는 부양의무자 기준을 충족한 것으로 볼 수 있으므로 관할 시·군·구의 사실조사가 필요합니다. 생계·주거·교육급여와 차상위계층·한부모가족 기준에는 부양의무자 기준이 적용되지 않습니다.`;
+    dutyWarn.innerHTML = `⚠ 부양능력 '있음'으로 판정된 부양의무자가 있어 <b>의료급여 수급자에 해당하지 않는 것</b>으로 추정됩니다. 다만 가족관계 단절 등으로 실제 부양을 받을 수 없는 경우에는 부양의무자 기준을 충족한 것으로 볼 수 있으므로 관할 시·군·구의 사실조사가 필요합니다. 생계·주거·교육급여와 차상위계층·한부모가족 기준에는 이 부양능력 판정이 적용되지 않습니다.`;
   } else if(duty){
     dutyWarn.style.display = 'block';
-    dutyWarn.innerHTML = `등록한 부양의무자 모두 <b>부양능력 없음</b>으로 판정되어 의료급여 부양의무자 기준을 충족하는 것으로 추정됩니다.`;
+    let msg = `등록한 부양의무자 모두 부양능력 <b>'있음'에 해당하지 않아</b> 의료급여 부양의무자 기준을 충족하는 것으로 추정됩니다.`;
+    if(totalBuyangbi > 0){
+      msg += ` 다만 부양능력 '미약'인 부양의무자의 부양비 ${fmt(totalBuyangbi)}이 의료급여 판정용 소득에 합산되어(소득인정액 ${fmt(incomeRecogMedical)}), 생계·주거·교육급여 등 다른 급여 판정과 결과가 달라질 수 있습니다.`;
+    }
+    dutyWarn.style.display = 'block';
+    dutyWarn.innerHTML = msg;
   } else {
     dutyWarn.style.display = 'none';
+  }
+  if(duty && duty.anyHighIncomeOrAsset){
+    const hi = document.getElementById('dutyWarn');
+    hi.style.display = 'block';
+    hi.innerHTML += `<br>⚠ 고소득·고재산 부양의무자 예외조항(연소득 ${fmt(num('slHighIncome'))} 이상 또는 재산(금융제외) ${fmt(num('slHighAsset'))} 이상)에 해당하는 부양의무자가 있어 <b>생계급여 선정기준에서 제외</b>됩니다. 의료·주거·교육급여, 차상위계층·한부모가족 기준에는 영향이 없습니다.`;
   }
 
   const vehWarn = document.getElementById('vehicleWarn');
@@ -945,6 +1070,7 @@ function renderDuty(duty, A){
   if(!duty){ card.style.display = 'none'; return; }
   card.style.display = 'block';
 
+  const tierPill = t => t==='있음' ? 'no' : (t==='미약' ? 'warn' : 'ok');
   const tbody = document.querySelector('#dutyTable tbody');
   tbody.innerHTML = '';
   duty.results.forEach(r=>{
@@ -952,30 +1078,40 @@ function renderDuty(duty, A){
     tr.innerHTML = `
       <td>${r.v.label} (${r.v.size}인, ${REGION_LABEL[r.v.region]})</td>
       <td>${fmt(r.v.income)}</td>
-      <td>${fmt(r.incomeLine)}</td>
+      <td>${r.exempt ? '미적용' : fmt(r.incomeLine)}</td>
       <td>${fmt(r.prop.conversion)}</td>
-      <td>${fmt(r.propLine)}</td>
-      <td><span class="pill ${r.capable?'no':'ok'}">${r.capable?'부양능력 있음':'부양능력 없음'}</span></td>
+      <td>${r.exempt ? '미적용' : fmt(r.propLine)}</td>
+      <td><span class="pill ${tierPill(r.tier)}">부양능력 ${r.tier}</span></td>
+      <td>${r.buyangbi>0 ? fmt(r.buyangbi) : '-'}</td>
+      <td>${(r.highIncome||r.highAsset) ? `<span class="pill no">해당</span>` : '해당없음'}</td>
     `;
     tbody.appendChild(tr);
   });
 
-  let bd = `<b>■ 판정 기준</b><br>`;
+  let bd = `<b>■ 판정 기준 (의료급여)</b><br>`;
   bd += `A(수급권자 가구 기준 중위소득) = ${fmt(A)}<br>`;
   bd += `소득기준 = (A×${num('dRateA')}%) + (B×${num('dRateB')}%)`;
   bd += duty.vulnerable ? ` 와 (A+B)×${num('dRateSoft')}% 중 높은 값 (취약계층 완화 적용)<br>` : `<br>`;
   bd += `재산기준 = (A+B)×${num('dRateProp')}%<br>`;
-  bd += `소득기준과 재산기준을 동시에 충족해야 부양능력 없음으로 판정합니다.<br><br>`;
+  bd += `소득·재산기준 모두 충족 시 '없음', 소득기준만 B의 ${num('dRateB')}% 이상이면서 종합기준 미만이면 '미약'(부양비 발생), 하나라도 초과하면 '있음'으로 판정합니다.<br><br>`;
+
+  bd += `<b>■ 생계급여 고소득·고재산 부양의무자 예외조항</b><br>`;
+  bd += `부양의무자 연소득 ${fmt(num('slHighIncome'))} 이상 또는 재산(금융재산 제외) ${fmt(num('slHighAsset'))} 이상이면, 그 사실만으로 <b>생계급여</b> 선정기준에서 제외됩니다(의료·주거·교육급여, 차상위·한부모가족 판정과는 무관).<br><br>`;
 
   duty.results.forEach(r=>{
     bd += `<b>■ ${r.v.label}</b> — B(${r.v.size}인 가구 기준 중위소득) = ${fmt(r.B)}<br>`;
-    bd += `소득기준 ${fmt(r.incomeLine)}`;
-    if(duty.vulnerable) bd += ` [(A×${num('dRateA')}%)+(B×${num('dRateB')}%) = ${fmt(r.baseLine)} / (A+B)×${num('dRateSoft')}% = ${fmt(r.softLine)}]`;
-    bd += ` ↔ 판정소득액 ${fmt(r.v.income)}<br>`;
-    bd += `기본재산액 ${fmt(r.prop.basic)}, 부채·기본재산액 차감 합계 ${fmt(r.prop.cut)}<br>`;
-    bd += `주거용 잔액 ${fmt(r.prop.housAfter)} × ${num('dRateHousing')}% + 일반·자동차 잔액 ${fmt(r.prop.genAfter)} × ${num('dRateGeneral')}% + 금융 잔액 ${fmt(r.prop.finAfter)} × ${num('dRateGeneral')}%<br>`;
-    bd += `재산의 소득환산액 ${fmt(r.prop.conversion)} ↔ 재산기준 ${fmt(r.propLine)}<br>`;
-    bd += `판정: <b>${r.capable?'부양능력 있음':'부양능력 없음'}</b> (${r.reason})<br><br>`;
+    if(r.exempt){
+      bd += `의료급여 부양의무자 기준: <b>미적용</b> (${r.reason})<br>`;
+    } else {
+      bd += `소득기준 ${fmt(r.incomeLine)}`;
+      if(duty.vulnerable) bd += ` [(A×${num('dRateA')}%)+(B×${num('dRateB')}%) = ${fmt(r.baseLine)} / (A+B)×${num('dRateSoft')}% = ${fmt(r.softLine)}]`;
+      bd += ` ↔ 판정소득액 ${fmt(r.v.income)}<br>`;
+      bd += `기본재산액 ${fmt(r.prop.basic)}, 부채·기본재산액 차감 합계 ${fmt(r.prop.cut)}<br>`;
+      bd += `주거용 잔액 ${fmt(r.prop.housAfter)} × ${num('dRateHousing')}% + 일반·자동차 잔액 ${fmt(r.prop.genAfter)} × ${num('dRateGeneral')}% + 금융 잔액 ${fmt(r.prop.finAfter)} × ${num('dRateGeneral')}%<br>`;
+      bd += `재산의 소득환산액 ${fmt(r.prop.conversion)} ↔ 재산기준 ${fmt(r.propLine)}<br>`;
+      bd += `의료급여 판정: <b>부양능력 ${r.tier}</b> (${r.reason})<br>`;
+    }
+    bd += `생계급여 고소득·고재산: 연소득 ${fmt(r.v.annualIncome)} ${r.highIncome?'≥':'<'} ${fmt(num('slHighIncome'))}, 재산(금융제외) ${fmt(r.highAssetValue)} ${r.highAsset?'≥':'<'} ${fmt(num('slHighAsset'))} → <b>${(r.highIncome||r.highAsset)?'예외조항 해당(생계급여 제외)':'해당없음'}</b><br><br>`;
   });
   document.getElementById('dutyDetail').innerHTML = bd;
 }
@@ -991,8 +1127,10 @@ function resetAll(){
   });
   document.getElementById('hhSize').value = 3;
   document.getElementById('region').value = 'metro';
+  document.getElementById('propExemptToggle').checked = false;
   document.getElementById('dutyRows').innerHTML = '';
   document.getElementById('dutyEnable').checked = true;
+  document.getElementById('dutyHhElderlyDisabled').checked = false;
   document.getElementById('dutyVulnerable').checked = false;
   document.getElementById('result').style.display = 'none';
   syncRegionHint();
@@ -1014,11 +1152,14 @@ function fillSample(){
   document.getElementById('financialProperty').value = 3000000;
   document.getElementById('debt').value = 5000000;
   addVehicleRow('car',1600,3000000,true,'general');
+  document.getElementById('propExemptToggle').checked = false;
   document.getElementById('dutyRows').innerHTML = '';
   document.getElementById('dutyEnable').checked = true;
+  document.getElementById('dutyHhElderlyDisabled').checked = false;
   document.getElementById('dutyVulnerable').checked = true;
   addDutyRow('장남', 3, 'other');
-  document.getElementById('dIncome_'+dutyRowId).value = 4200000;
+  document.getElementById('dIncome_'+dutyRowId).value = 6000000;
+  document.getElementById('dAnnualIncome_'+dutyRowId).value = 60000000;
   document.getElementById('dHousing_'+dutyRowId).value = 180000000;
   document.getElementById('dFinancial_'+dutyRowId).value = 20000000;
   document.getElementById('dDebt_'+dutyRowId).value = 60000000;
@@ -1051,6 +1192,9 @@ function resetSettings(){
   document.getElementById('youthFlat').value = 600000;
   document.getElementById('seniorFlat').value = 200000;
   document.getElementById('rehabRate').value = 50;
+  document.getElementById('slHighIncome').value = 130000000;
+  document.getElementById('slHighAsset').value = 1200000000;
+  document.getElementById('propExemptCap').value = 85000000;
   document.getElementById('dDedSeoul').value = 364000000;
   document.getElementById('dDedGyeonggi').value = 294000000;
   document.getElementById('dDedMetro').value = 283000000;
