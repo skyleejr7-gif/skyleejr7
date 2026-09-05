@@ -84,9 +84,9 @@
 
 <header>
   <div class="wrap" style="padding:0;">
-    <h1>국민기초생활보장 · 차상위계층 · 한부모가족 · 자산형성지원 · 기초연금 · 장애인연금 통합 판정 프로그램</h1>
+    <h1>국민기초생활보장 · 차상위계층 · 한부모가족 · 자산형성지원 · 기초연금 · 장애인복지(장애인연금·장애수당) 통합 판정 프로그램</h1>
     <p>소득·재산·금융재산·자동차·부양의무자 정보를 입력하면 소득인정액을 계산하여 생계·의료·주거·교육급여, 차상위 세부사업(확인·자활·본인부담경감),
-    한부모가족, 자산형성지원사업, 기초연금·장애인연금까지 한 번에 판정합니다. (2026년·2027년 기준 반영)</p>
+    한부모가족, 자산형성지원사업, 기초연금, 장애인연금·장애수당·장애아동수당까지 한 번에 판정합니다. (2026년·2027년 기준 반영)</p>
   </div>
 </header>
 
@@ -274,6 +274,10 @@
       두 제도는 국민기초생활보장과 <b>별도의 소득인정액 산식</b>(근로소득공제 정액+30%, 재산의 소득환산율 연 4%, 금융재산 공제 2,000만원,
       고급자동차·회원권 별도 산입)을 사용하므로, 아래 항목을 따로 입력하세요. 부양의무자 기준은 적용되지 않습니다.
     </p>
+    <div class="hint" style="margin-bottom:14px;">
+      장애수당·장애아동수당은 소득 산식이 따로 없고 <b>국민기초생활수급자(생계·의료·주거·교육급여) 또는 차상위계층 여부</b>로 판정하므로,
+      바로 아래가 아니라 이 카드 하단의 "장애수당 · 장애아동수당" 항목에서 입력합니다.
+    </div>
     <div class="grid">
       <div class="field">
         <label>대상 유형</label>
@@ -324,6 +328,38 @@
         <input type="number" id="pLuxuryAsset" min="0" value="0">
         <div class="hint">차량가액 4,000만원 이상 &amp; 차령 10년 미만 승용·승합·이륜차, 골프·콘도·승마 등 회원권. 월 100% 그대로 소득인정액에 반영(일반재산에서 제외).</div>
       </div>
+    </div>
+
+    <h3 class="mini">장애수당 · 장애아동수당</h3>
+    <p class="sub" style="margin-bottom:10px;">
+      별도의 소득인정액 기준 없이, <b>위 ①~⑥에서 판정된 국민기초생활수급자(생계·의료·주거·교육급여) 또는 차상위계층 여부</b>와
+      아래 장애 정도·연령을 함께 판정합니다.
+    </p>
+    <label class="chk"><input type="checkbox" id="daRegistered"> 등록장애인임</label>
+    <div class="grid" style="margin-top:10px;">
+      <div class="field">
+        <label>장애 정도</label>
+        <select id="daSeverity">
+          <option value="severe">장애정도가 심한 장애인 (중증, 구 1~3급)</option>
+          <option value="mild">장애정도가 심하지 않은 장애인 (경증, 구 4~6급)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>대상자 연령(만 나이)</label>
+        <input type="number" id="daAge" min="0" max="120" value="10">
+      </div>
+      <div class="field">
+        <label>장애인연금 수급 중</label>
+        <select id="daPensionReceiving">
+          <option value="0">아니오</option>
+          <option value="1">예</option>
+        </select>
+      </div>
+    </div>
+    <label class="chk" style="margin-top:10px;"><input type="checkbox" id="daSchoolExt"> 만 18~20세이며 「초·중등교육법」상 학교 재학 중(휴학·의무교육 유예 포함) — 장애아동수당 연령 특례</label>
+    <div class="hint" style="margin-top:6px;">
+      장애수당(월 6만원 내외)은 만 18세 이상 경증 등록장애인이 대상이며, 장애아동수당(중증 월 22만원·경증 월 11만원 내외)은 만 18세 미만
+      (또는 위 특례로 만 20세까지) 등록장애인이 중증·경증 관계없이 대상입니다. 두 수당 모두 이미 장애인연금을 받고 있으면 제외됩니다.
     </div>
   </div>
 
@@ -403,6 +439,18 @@
         </table>
       </div>
       <div id="pensionDetail" class="breakdown" style="margin-top:10px;"></div>
+    </div>
+
+    <div class="card">
+      <h2>장애수당 · 장애아동수당 판정</h2>
+      <p class="sub">국민기초생활수급자·차상위계층 여부(위 판정 결과) + 장애 정도·연령을 함께 봅니다.</p>
+      <div class="tablewrap">
+        <table id="disabilityAllowanceTable">
+          <thead><tr><th>제도</th><th>기준</th><th>판정</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div id="disabilityAllowanceDetail" class="breakdown" style="margin-top:10px;"></div>
     </div>
 
     <div class="card">
@@ -620,6 +668,16 @@
       · 부부가구는 부부 각자의 소득인정액을 합산한 세대 소득인정액을 부부가구 선정기준액과 비교(이 계산기는 입력값을 가구 합산으로 간주)<br>
       · 두 제도 모두 부양의무자 기준은 적용되지 않음</p>
 
+      <p><b>11. 장애수당 · 장애아동수당 (별도 소득기준 없이 수급자·차상위 여부로 판정)</b><br>
+      · 두 수당 모두 독자적인 소득인정액 기준이 없고, <b>국민기초생활수급자(생계·의료·주거·교육급여 중 하나라도 해당) 또는
+        차상위계층(소득인정액 50% 이하)</b>이면서 등록장애인일 것을 요건으로 함<br>
+      · <b>장애수당</b>: 만 18세 이상 「장애인복지법」상 장애정도가 심하지 않은 장애인(경증, 구 4~6급) 대상. 재가 월 6만원 내외
+        (시설수급자는 낮은 금액)<br>
+      · <b>장애아동수당</b>: 만 18세 미만 등록장애인이 중증·경증 관계없이 대상이며, 만 18~20세라도 「초·중등교육법」상 학교에
+        재학 중(휴학·의무교육 유예 포함)이면 연령 특례로 포함. 중증 재가 월 22만원, 경증 재가 월 11만원 내외<br>
+      · 이미 <b>장애인연금을 받고 있는 경우</b>(주로 만 18세 이상 중증장애인) 장애수당·장애아동수당에서 제외<br>
+      · 차상위계층에 속한 등록장애인(이른바 "차상위장애인")도 위 기준에 따라 장애수당·장애아동수당 대상에 포함됨</p>
+
       <p style="margin-top:10px;">※ 실제 조사에서는 재산의 세부 항목(분양권·조합원입주권 등), 근로능력 판정,
       자동차 보유 한도에 대한 지방생활보장위원회 심의, 부양비 산정의 세부 조정 등 추가 변수가 반영됩니다.
       이 도구는 대표적인 산식을 반영한 추정 계산기입니다.</p>
@@ -636,7 +694,8 @@
   생계급여 고소득·고재산 부양의무자 예외조항 2027년까지 단계적 폐지 계획), 보건복지부 「차상위계층확인·차상위자활·차상위 본인부담경감대상자
   선정기준」, 보건복지부 「2026년 자활사업안내(자산형성지원 통장사업 안내)」(희망저축계좌Ⅰ·Ⅱ, 청년내일저축계좌 가입·유지 기준),
   보건복지부 보도자료(2026년 기초연금 선정기준액 단독 247만원·부부 395.2만원, 2026년 장애인연금 선정기준액 단독 140만원·부부 224만원),
-  「기초연금법 시행령」·「장애인연금법 시행령」상 소득인정액 산정방식(소득평가액·재산의 소득환산액, 국민연금공단 기초연금·장애인연금 안내).</p>
+  「기초연금법 시행령」·「장애인연금법 시행령」상 소득인정액 산정방식(소득평가액·재산의 소득환산액, 국민연금공단 기초연금·장애인연금 안내),
+  「장애인복지법」·「찾기쉬운 생활법령정보」 장애수당·장애아동수당 대상자 선정기준(국민기초생활수급자·차상위계층, 장애정도·연령 요건).</p>
   <p>2027년 기준 중위소득은 관보 고시를 거쳐 2027년 1월 1일부터 적용됩니다. 급여별 선정기준 비율은 2026년과 동일합니다.
   생계급여 고소득·고재산 기준(연소득 1억3,000만원/재산 12억원), 부양의무자 완전면제 특례, 재산범위 특례액 등은 매년 조정될 수 있으므로
   최신 수치는 보건복지부(www.mohw.go.kr) 및 관할 행정복지센터를 통해 확인하시기 바랍니다.</p>
@@ -1171,6 +1230,7 @@ function calculate(){
   renderDuty(duty, median);
   renderNearPoorAndAsset(passMap, median, hhSize, inc, prop, duty, incomeRecogMedical);
   renderPension();
+  renderDisabilityAllowance(passMap);
 
   const summaryBox = document.getElementById('summaryBox');
   if(basicRecipient){
@@ -1449,6 +1509,49 @@ function renderPension(){
   document.getElementById('pensionDetail').innerHTML = bd;
 }
 
+/* ---------------- 장애수당 · 장애아동수당 ---------------- */
+function renderDisabilityAllowance(passMap){
+  const isRecipientOrNearPoor = !!(passMap['생계급여'] || passMap['의료급여'] || passMap['주거급여'] || passMap['교육급여'] || passMap['차상위계층']);
+  const registered = document.getElementById('daRegistered').checked;
+  const severity = document.getElementById('daSeverity').value; // severe/mild
+  const age = num('daAge');
+  const receivingPension = document.getElementById('daPensionReceiving').value === '1';
+  const schoolExt = document.getElementById('daSchoolExt').checked;
+
+  const childAgeOk = age < 18 || (age >= 18 && age <= 20 && schoolExt);
+  const adultAgeOk = age >= 18 && !(age <= 20 && schoolExt);
+
+  const allowanceRows = [
+    {
+      label: '장애수당',
+      need: '만 18세 이상 경증(심하지 않은) 등록장애인 + 기초생활수급자 또는 차상위계층 + 장애인연금 미수급',
+      pass: registered && severity==='mild' && adultAgeOk && isRecipientOrNearPoor && !receivingPension
+    },
+    {
+      label: '장애아동수당',
+      need: '만 18세 미만(또는 18~20세 재학 특례) 등록장애인(중증·경증 불문) + 기초생활수급자 또는 차상위계층 + 장애인연금 미수급',
+      pass: registered && childAgeOk && isRecipientOrNearPoor && !receivingPension
+    }
+  ];
+
+  const tbody = document.querySelector('#disabilityAllowanceTable tbody');
+  tbody.innerHTML = '';
+  allowanceRows.forEach(r=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${r.label}</td>
+      <td>${r.need}</td>
+      <td><span class="pill ${r.pass?'ok':'no'}">${r.pass?'적합(해당)':'부적합(해당없음)'}</span></td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  let bd = `기초생활수급자 또는 차상위계층 해당: ${isRecipientOrNearPoor?'예':'아니오'}, 등록장애인: ${registered?'예':'아니오'}, `;
+  bd += `장애정도: ${severity==='severe'?'심한 장애인(중증)':'심하지 않은 장애인(경증)'}, 연령: 만 ${age}세, 장애인연금 수급 중: ${receivingPension?'예':'아니오'}<br>`;
+  bd += `※ 장애정도가 심한(중증) 등록장애인은 통상 만 18세 이상이면 장애인연금 대상이며, 장애수당은 경증 성인만 해당합니다. 장애아동수당은 중증·경증 관계없이 만 18세 미만(학령기 특례 시 20세까지) 등록장애인이 대상입니다.`;
+  document.getElementById('disabilityAllowanceDetail').innerHTML = bd;
+}
+
 /* ---------------- 초기화 · 예시 · 기준값 재설정 ---------------- */
 function resetAll(){
   document.getElementById('incomeRows').innerHTML = '';
@@ -1475,6 +1578,11 @@ function resetAll(){
    'pGeneralProperty','pFinancialProperty','pDebt','pLuxuryAsset'].forEach(id=>{
     document.getElementById(id).value = 0;
   });
+  document.getElementById('daRegistered').checked = false;
+  document.getElementById('daSeverity').value = 'severe';
+  document.getElementById('daAge').value = 10;
+  document.getElementById('daPensionReceiving').value = '0';
+  document.getElementById('daSchoolExt').checked = false;
   document.getElementById('result').style.display = 'none';
   syncRegionHint();
 }
@@ -1522,6 +1630,11 @@ function fillSample(){
   document.getElementById('pFinancialProperty').value = 3000000;
   document.getElementById('pDebt').value = 5000000;
   document.getElementById('pLuxuryAsset').value = 0;
+  document.getElementById('daRegistered').checked = true;
+  document.getElementById('daSeverity').value = 'mild';
+  document.getElementById('daAge').value = 25;
+  document.getElementById('daPensionReceiving').value = '0';
+  document.getElementById('daSchoolExt').checked = false;
   syncRegionHint();
 }
 
