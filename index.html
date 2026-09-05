@@ -266,6 +266,66 @@
     </div>
   </div>
 
+  <!-- 기초연금 · 장애인연금 -->
+  <div class="card">
+    <h2>⑦ 기초연금 · 장애인연금</h2>
+    <p class="sub">
+      두 제도는 국민기초생활보장과 <b>별도의 소득인정액 산식</b>(근로소득공제 정액+30%, 재산의 소득환산율 연 4%, 금융재산 공제 2,000만원,
+      고급자동차·회원권 별도 산입)을 사용하므로, 아래 항목을 따로 입력하세요. 부양의무자 기준은 적용되지 않습니다.
+    </p>
+    <div class="grid">
+      <div class="field">
+        <label>대상 유형</label>
+        <select id="pensionType">
+          <option value="basic">기초연금 (만 65세 이상)</option>
+          <option value="disability">장애인연금 (만 18세 이상 중증장애인)</option>
+          <option value="both">기초연금 + 장애인연금 모두 판정</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>가구 유형</label>
+        <select id="pensionHhType">
+          <option value="single">단독가구 (본인만 신청/해당)</option>
+          <option value="couple">부부가구 (배우자도 수급 또는 신청)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>지역 구분 (재산 기본재산액 산정용)</label>
+        <select id="pensionRegion">
+          <option value="metro">대도시 (특별시·광역시, 군 지역 제외)</option>
+          <option value="mid">중소도시</option>
+          <option value="rural">농어촌</option>
+        </select>
+      </div>
+    </div>
+
+    <h3 class="mini">소득 (월, 가구 합산)</h3>
+    <div class="grid">
+      <div class="field"><label>근로소득</label><input type="number" id="pIncomeLabor" min="0" value="0"></div>
+      <div class="field"><label>사업소득</label><input type="number" id="pIncomeBusiness" min="0" value="0"></div>
+      <div class="field"><label>재산소득 (임대·이자·연금소득 등)</label><input type="number" id="pIncomeProperty" min="0" value="0"></div>
+      <div class="field"><label>공적이전소득 (기초연금 제외 기타 공적급여 등)</label><input type="number" id="pIncomePublic" min="0" value="0"></div>
+      <div class="field"><label>사적이전소득</label><input type="number" id="pIncomePrivate" min="0" value="0"></div>
+      <div class="field">
+        <label>무료임차소득 (월, 있는 경우)</label>
+        <input type="number" id="pFreeRent" min="0" value="0">
+        <div class="hint">자녀 등 명의의 공시가격 6억원 이상 주택에 무료로 거주하는 경우 국민연금공단 산정방식에 따른 월 소득환산액을 직접 입력하세요.</div>
+      </div>
+    </div>
+
+    <h3 class="mini">재산 (가구 합산)</h3>
+    <div class="grid">
+      <div class="field"><label>일반재산 (주택·토지 등 공시가격 합계, 고급자동차 제외)</label><input type="number" id="pGeneralProperty" min="0" value="0"></div>
+      <div class="field"><label>금융재산</label><input type="number" id="pFinancialProperty" min="0" value="0"></div>
+      <div class="field"><label>부채</label><input type="number" id="pDebt" min="0" value="0"></div>
+      <div class="field">
+        <label>고급자동차·회원권 가액</label>
+        <input type="number" id="pLuxuryAsset" min="0" value="0">
+        <div class="hint">차량가액 4,000만원 이상 &amp; 차령 10년 미만 승용·승합·이륜차, 골프·콘도·승마 등 회원권. 월 100% 그대로 소득인정액에 반영(일반재산에서 제외).</div>
+      </div>
+    </div>
+  </div>
+
   <button class="btn-primary" onclick="calculate()">판정 결과 계산하기</button>
   <div class="actions" style="margin:10px 0 0;justify-content:center;">
     <button class="btn-ghost" onclick="fillSample()">예시 값 채우기</button>
@@ -326,6 +386,22 @@
         </table>
       </div>
       <div id="assetDetail" class="breakdown" style="margin-top:10px;"></div>
+    </div>
+
+    <div class="card">
+      <h2>기초연금 · 장애인연금 판정</h2>
+      <p class="sub">국민기초생활보장과 별도의 소득인정액 산식을 사용합니다(⑦에서 입력한 값 기준).</p>
+      <div class="headline" style="margin-bottom:14px;">
+        <div class="lbl">기초연금·장애인연금용 월 소득인정액</div>
+        <div class="amt" id="outPensionIncome">0원</div>
+      </div>
+      <div class="tablewrap">
+        <table id="pensionTable">
+          <thead><tr><th>제도</th><th>가구 유형</th><th>선정기준액</th><th>판정</th><th>기준 대비 여유/초과</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div id="pensionDetail" class="breakdown" style="margin-top:10px;"></div>
     </div>
 
     <div class="card">
@@ -410,6 +486,26 @@
         <div class="field"><label>청년내일저축계좌 연령 하한 (만 세)</label><input type="number" id="assetYouthAgeMin" value="15"></div>
       </div>
       <div class="hint">총재산기준은 2020년대 대도시 기준 참고값(약 3.5억원)입니다. 지역별 정확한 최신 금액은 자산형성포털(hope.welfareinfo.or.kr) 또는 관할 행정복지센터에서 확인 후 수정하시기 바랍니다.</div>
+
+      <h3 class="mini">기초연금 · 장애인연금 선정기준액 (2026년, 원/월)</h3>
+      <div class="grid">
+        <div class="field"><label>기초연금 단독가구</label><input type="number" id="pBasicSingle" value="2470000"></div>
+        <div class="field"><label>기초연금 부부가구</label><input type="number" id="pBasicCouple" value="3952000"></div>
+        <div class="field"><label>장애인연금 단독가구</label><input type="number" id="pDisabilitySingle" value="1400000"></div>
+        <div class="field"><label>장애인연금 부부가구</label><input type="number" id="pDisabilityCouple" value="2240000"></div>
+      </div>
+
+      <h3 class="mini">기초연금 · 장애인연금 소득인정액 산식 기준</h3>
+      <div class="grid">
+        <div class="field"><label>근로소득 정액공제 (원)</label><input type="number" id="pLaborFlat" value="1080000"></div>
+        <div class="field"><label>근로소득 추가공제율 (%)</label><input type="number" id="pLaborRate" value="30" step="0.1"></div>
+        <div class="field"><label>금융재산 공제 (원)</label><input type="number" id="pFinBasic" value="20000000"></div>
+        <div class="field"><label>재산의 소득환산율 (연 %)</label><input type="number" id="pPropRateYear" value="4" step="0.1"></div>
+        <div class="field"><label>기본재산액 - 대도시 (원)</label><input type="number" id="pDedMetro" value="135000000"></div>
+        <div class="field"><label>기본재산액 - 중소도시 (원)</label><input type="number" id="pDedMid" value="85000000"></div>
+        <div class="field"><label>기본재산액 - 농어촌 (원)</label><input type="number" id="pDedRural" value="72500000"></div>
+      </div>
+      <div class="hint">기초연금·장애인연금은 국민기초생활보장과 달리 대도시/중소도시/농어촌 3단계 지역 구분과 별도의 소득인정액 산식(국민연금법 시행령 준용)을 사용합니다. 매년 변경되는 선정기준액은 보건복지부 보도자료 또는 복지로(bokjiro.go.kr)에서 재확인하시기 바랍니다.</div>
 
       <h3 class="mini">부양의무자 기본재산액 (지역별, 원)</h3>
       <div class="grid">
@@ -510,6 +606,19 @@
       · 세 사업 모두 정확한 지역별 총재산기준과 매년 변경되는 소득 요건은 자산형성포털(hope.welfareinfo.or.kr) 또는 관할 행정복지센터에서
         재확인이 필요</p>
 
+      <p><b>10. 기초연금 · 장애인연금 (국민기초생활보장과 별도의 소득인정액 산식)</b><br>
+      · 대상: 기초연금은 만 65세 이상, 장애인연금은 만 18세 이상 「장애인복지법」상 장애정도가 심한 장애인(구 1~3급)<br>
+      · 소득인정액 = 소득평가액 + 재산의 소득환산액<br>
+      · 소득평가액 = 0.7 × (근로소득 − 108만원, 0 미만이면 0) + 기타소득(사업·재산·공적이전·사적이전·무료임차소득 합계, 공제 없음)<br>
+      · 재산의 소득환산액 = [(일반재산 − 기본재산액) + (금융재산 − 2,000만원) − 부채] × 연 4% ÷ 12 + 고급자동차·회원권 가액(월 100% 그대로 반영,
+        일반재산에서 제외)<br>
+      · 기본재산액(3단계 지역구분, 국민기초생활보장의 4단계 구분과 다름): 대도시 1억3,500만원, 중소도시 8,500만원, 농어촌 7,250만원<br>
+      · 고급자동차: 차량가액 4,000만원 이상 &amp; 차령 10년 미만 승용·승합·이륜차 / 회원권: 골프·콘도·승마 등<br>
+      · 무료임차소득: 자녀 등 명의의 공시가격 6억원 이상 주택에 무료로 거주하는 경우 국민연금공단 산정방식에 따른 월 소득환산액을 반영<br>
+      · 2026년 선정기준액: 기초연금 단독가구 247만원 · 부부가구 395만 2,000원, 장애인연금 단독가구 140만원 · 부부가구 224만원<br>
+      · 부부가구는 부부 각자의 소득인정액을 합산한 세대 소득인정액을 부부가구 선정기준액과 비교(이 계산기는 입력값을 가구 합산으로 간주)<br>
+      · 두 제도 모두 부양의무자 기준은 적용되지 않음</p>
+
       <p style="margin-top:10px;">※ 실제 조사에서는 재산의 세부 항목(분양권·조합원입주권 등), 근로능력 판정,
       자동차 보유 한도에 대한 지방생활보장위원회 심의, 부양비 산정의 세부 조정 등 추가 변수가 반영됩니다.
       이 도구는 대표적인 산식을 반영한 추정 계산기입니다.</p>
@@ -524,7 +633,9 @@
   부양의무자 재산의 소득환산제 194쪽, 부양능력 판정 기본개념·부양비 196쪽, 부양의무자 기준 미적용·완화 특례, 재산범위 특례),
   여성가족부 「2026년 한부모가족지원사업 안내」, 보건복지부 보도자료(2026.7.28. 제80차 중앙생활보장위원회, 2027년도 기준 중위소득 6.70% 인상,
   생계급여 고소득·고재산 부양의무자 예외조항 2027년까지 단계적 폐지 계획), 보건복지부 「차상위계층확인·차상위자활·차상위 본인부담경감대상자
-  선정기준」, 보건복지부 「2026년 자활사업안내(자산형성지원 통장사업 안내)」(희망저축계좌Ⅰ·Ⅱ, 청년내일저축계좌 가입·유지 기준).</p>
+  선정기준」, 보건복지부 「2026년 자활사업안내(자산형성지원 통장사업 안내)」(희망저축계좌Ⅰ·Ⅱ, 청년내일저축계좌 가입·유지 기준),
+  보건복지부 보도자료(2026년 기초연금 선정기준액 단독 247만원·부부 395.2만원, 2026년 장애인연금 선정기준액 단독 140만원·부부 224만원),
+  「기초연금법 시행령」·「장애인연금법 시행령」상 소득인정액 산정방식(소득평가액·재산의 소득환산액, 국민연금공단 기초연금·장애인연금 안내).</p>
   <p>2027년 기준 중위소득은 관보 고시를 거쳐 2027년 1월 1일부터 적용됩니다. 급여별 선정기준 비율은 2026년과 동일합니다.
   생계급여 고소득·고재산 기준(연소득 1억3,000만원/재산 12억원), 부양의무자 완전면제 특례, 재산범위 특례액 등은 매년 조정될 수 있으므로
   최신 수치는 보건복지부(www.mohw.go.kr) 및 관할 행정복지센터를 통해 확인하시기 바랍니다.</p>
@@ -1058,6 +1169,7 @@ function calculate(){
 
   renderDuty(duty, median);
   renderNearPoorAndAsset(passMap, median, hhSize, inc, prop, duty, incomeRecogMedical);
+  renderPension();
 
   const summaryBox = document.getElementById('summaryBox');
   if(basicRecipient){
@@ -1274,6 +1386,68 @@ function renderNearPoorAndAsset(passMap, median, hhSize, inc, prop, duty, income
   document.getElementById('assetDetail').innerHTML = bd;
 }
 
+/* ---------------- 기초연금 · 장애인연금 (별도 소득인정액 산식) ---------------- */
+function renderPension(){
+  const type = document.getElementById('pensionType').value;
+  const hhType = document.getElementById('pensionHhType').value;
+  const region = document.getElementById('pensionRegion').value;
+  const regionLabel = {metro:'대도시', mid:'중소도시', rural:'농어촌'}[region];
+  const hhLabel = hhType==='couple' ? '부부가구' : '단독가구';
+  const dedMap = {metro:'pDedMetro', mid:'pDedMid', rural:'pDedRural'};
+  const basicDeduction = num(dedMap[region]);
+
+  const labor = num('pIncomeLabor');
+  const business = num('pIncomeBusiness');
+  const propertyIncome = num('pIncomeProperty');
+  const publicTransfer = num('pIncomePublic');
+  const privateTransfer = num('pIncomePrivate');
+  const freeRent = num('pFreeRent');
+  const generalProperty = num('pGeneralProperty');
+  const financialProperty = num('pFinancialProperty');
+  const debt = num('pDebt');
+  const luxuryAsset = num('pLuxuryAsset');
+
+  const laborFlat = num('pLaborFlat');
+  const laborRate = num('pLaborRate')/100;
+  const laborEvaluated = Math.max(0, labor - laborFlat) * (1 - laborRate);
+  const otherIncome = business + propertyIncome + publicTransfer + privateTransfer + freeRent;
+  const incomeAssessment = laborEvaluated + otherIncome;
+
+  const finBasic = num('pFinBasic');
+  const propRateMonth = num('pPropRateYear')/100/12;
+  const propTerm = (generalProperty - basicDeduction) + (financialProperty - finBasic) - debt;
+  const propConversion = Math.max(0, propTerm) * propRateMonth + luxuryAsset;
+
+  const incomeRecog = incomeAssessment + propConversion;
+  document.getElementById('outPensionIncome').textContent = fmt(incomeRecog);
+
+  const rows = [];
+  if(type==='basic' || type==='both') rows.push({label:'기초연금', threshold: hhType==='couple' ? num('pBasicCouple') : num('pBasicSingle')});
+  if(type==='disability' || type==='both') rows.push({label:'장애인연금', threshold: hhType==='couple' ? num('pDisabilityCouple') : num('pDisabilitySingle')});
+
+  const tbody = document.querySelector('#pensionTable tbody');
+  tbody.innerHTML = '';
+  rows.forEach(r=>{
+    const pass = incomeRecog <= r.threshold;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${r.label}</td>
+      <td>${hhLabel}</td>
+      <td>${fmt(r.threshold)}</td>
+      <td><span class="pill ${pass?'ok':'no'}">${pass?'적합(해당)':'부적합(해당없음)'}</span></td>
+      <td>${fmtSigned(r.threshold-incomeRecog)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  let bd = `근로소득 평가액 = 0.7 × (${fmt(labor)} − ${fmt(laborFlat)}) = ${fmt(laborEvaluated)} (근로소득이 정액공제 이하이면 0원)<br>`;
+  bd += `기타소득 합계(사업+재산+공적이전+사적이전+무료임차) = ${fmt(otherIncome)}<br>`;
+  bd += `소득평가액 = ${fmt(incomeAssessment)}<br><br>`;
+  bd += `재산의 소득환산액 = [(일반재산 ${fmt(generalProperty)} − 기본재산액 ${fmt(basicDeduction)}(${regionLabel})) + (금융재산 ${fmt(financialProperty)} − ${fmt(finBasic)}) − 부채 ${fmt(debt)}] × 연${num('pPropRateYear')}%÷12 + 고급자동차·회원권 ${fmt(luxuryAsset)} = ${fmt(propConversion)}<br><br>`;
+  bd += `기초연금·장애인연금용 소득인정액 = ${fmt(incomeRecog)}`;
+  document.getElementById('pensionDetail').innerHTML = bd;
+}
+
 /* ---------------- 초기화 · 예시 · 기준값 재설정 ---------------- */
 function resetAll(){
   document.getElementById('incomeRows').innerHTML = '';
@@ -1293,6 +1467,13 @@ function resetAll(){
   document.getElementById('nearWorkAble').checked = false;
   document.getElementById('nearMedicalTarget').checked = false;
   document.getElementById('assetAge').value = 30;
+  document.getElementById('pensionType').value = 'basic';
+  document.getElementById('pensionHhType').value = 'single';
+  document.getElementById('pensionRegion').value = 'metro';
+  ['pIncomeLabor','pIncomeBusiness','pIncomeProperty','pIncomePublic','pIncomePrivate','pFreeRent',
+   'pGeneralProperty','pFinancialProperty','pDebt','pLuxuryAsset'].forEach(id=>{
+    document.getElementById(id).value = 0;
+  });
   document.getElementById('result').style.display = 'none';
   syncRegionHint();
 }
@@ -1327,6 +1508,19 @@ function fillSample(){
   document.getElementById('nearWorkAble').checked = true;
   document.getElementById('nearMedicalTarget').checked = false;
   document.getElementById('assetAge').value = 22;
+  document.getElementById('pensionType').value = 'basic';
+  document.getElementById('pensionHhType').value = 'single';
+  document.getElementById('pensionRegion').value = 'mid';
+  document.getElementById('pIncomeLabor').value = 0;
+  document.getElementById('pIncomeBusiness').value = 0;
+  document.getElementById('pIncomeProperty').value = 0;
+  document.getElementById('pIncomePublic').value = 300000;
+  document.getElementById('pIncomePrivate').value = 0;
+  document.getElementById('pFreeRent').value = 0;
+  document.getElementById('pGeneralProperty').value = 45000000;
+  document.getElementById('pFinancialProperty').value = 3000000;
+  document.getElementById('pDebt').value = 5000000;
+  document.getElementById('pLuxuryAsset').value = 0;
   syncRegionHint();
 }
 
@@ -1369,6 +1563,17 @@ function resetSettings(){
   document.getElementById('dRateB').value = 100;
   document.getElementById('dRateSoft').value = 74;
   document.getElementById('dRateProp').value = 18;
+  document.getElementById('pBasicSingle').value = 2470000;
+  document.getElementById('pBasicCouple').value = 3952000;
+  document.getElementById('pDisabilitySingle').value = 1400000;
+  document.getElementById('pDisabilityCouple').value = 2240000;
+  document.getElementById('pLaborFlat').value = 1080000;
+  document.getElementById('pLaborRate').value = 30;
+  document.getElementById('pFinBasic').value = 20000000;
+  document.getElementById('pPropRateYear').value = 4;
+  document.getElementById('pDedMetro').value = 135000000;
+  document.getElementById('pDedMid').value = 85000000;
+  document.getElementById('pDedRural').value = 72500000;
   document.getElementById('assetIncomeRate').value = 50;
   document.getElementById('assetHope1Rate').value = 60;
   document.getElementById('assetMinIncome').value = 100000;
