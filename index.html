@@ -214,15 +214,19 @@
   <div class="card">
     <h2>⑤ 부양의무자 (생계급여 예외조항·의료급여·차상위 본인부담경감 판정용)</h2>
     <p class="sub">
-      생계·주거·교육급여는 부양의무자 기준이 폐지되었으나, <b>생계급여는 고소득·고재산 부양의무자 예외조항</b>이 남아있고
-      <b>의료급여와 차상위 본인부담경감은 동일한 부양능력 판정식(없음·미약·있음 3단계)</b>을 사용합니다. 부양의무자 가구를 하나씩 등록하세요.
+      생계·주거·교육급여는 부양의무자 기준이 폐지되었으나, <b>생계급여는 고소득·고재산 부양의무자 예외조항</b>이 남아있습니다.
+      <b>의료급여</b>와 <b>차상위 본인부담경감</b>은 부양의무자 기준이 각각 유지되지만 <b>산식이 서로 다릅니다</b>
+      (의료급여는 소득+재산 결합 3단계, 차상위 본인부담경감은 부양의무자 소득만 비교). 아래에 부양의무자 가구를 한 번만 등록하면
+      두 판정에 각각 다른 방식으로 반영됩니다.
     </p>
 
     <label class="chk"><input type="checkbox" id="dutyEnable" checked> 부양의무자 판정 포함</label>
     <div class="hint" style="margin:6px 0 14px;">
-      부양의무자는 1촌의 직계혈족(부모·자녀) 및 그 배우자입니다. 의료급여는 <b>한 명이라도 부양능력 '있음'이면 수급자에서 제외</b>되고,
-      '미약'으로 판정된 부양의무자는 부양비(판정소득액이 B 초과분의 10%)가 수급(권)자 가구 소득에 합산됩니다.
-      수급(권)자가 30세 미만 한부모가구·자립준비청년(보호종료아동)인 경우는 부양의무자 기준 자체가 적용되지 않으므로 등록하지 마십시오.
+      부양의무자는 1촌의 직계혈족(부모·자녀) 및 그 배우자입니다. <b>의료급여</b>는 한 명이라도 부양능력 '있음'(소득+재산 3단계)이면
+      수급자에서 제외되고, '미약'으로 판정된 부양의무자는 부양비(판정소득액이 B 초과분의 10%)가 수급(권)자 가구 소득에 합산됩니다.
+      <b>차상위 본인부담경감</b>은 이와 별개로 부양의무자의 소득만을 부양의무자 가구 기준 중위소득과 비교합니다(재산·부양비 미반영,
+      "기준값 설정"에서 비율 조정 가능). 수급(권)자가 30세 미만 한부모가구·자립준비청년(보호종료아동)인 경우는 부양의무자 기준 자체가
+      적용되지 않으므로 등록하지 마십시오.
     </div>
 
     <label class="chk"><input type="checkbox" id="dutyHhElderlyDisabled"> 수급(권)자 가구에 65세 이상 노인 또는 장애정도가 심한 장애인(중증)이 포함됨</label>
@@ -416,6 +420,7 @@
           <tbody></tbody>
         </table>
       </div>
+      <div id="nearPoorDutyDetail" class="breakdown" style="margin-top:10px;"></div>
       <div class="tablewrap" style="margin-top:14px;">
         <table id="assetTable">
           <thead><tr><th>자산형성지원사업</th><th>핵심 요건</th><th>판정</th></tr></thead>
@@ -574,6 +579,16 @@
         <div class="field"><label>재산기준 비율 (A+B의 %)</label><input type="number" id="dRateProp" value="18" step="0.1"></div>
       </div>
 
+      <h3 class="mini">차상위 본인부담경감 부양의무자 기준 (의료급여와 별개, 소득만 비교)</h3>
+      <div class="grid">
+        <div class="field"><label>소득기준 비율 (부양의무자 가구 기준중위소득 대비, %)</label><input type="number" id="naSupportIncomeRate" value="100" step="0.1"></div>
+      </div>
+      <div class="hint">
+        차상위 본인부담경감대상자는 의료급여의 소득+재산 3단계 판정을 쓰지 않고, <b>부양의무자의 소득이 부양의무자 가구
+        기준 중위소득의 이 비율 이상이면 부양능력 '있음'</b>으로 봅니다(재산·부양비 미반영). 정확한 비율은 매년 사업안내에서
+        재확인하시기 바랍니다.
+      </div>
+
       <div class="actions" style="margin-top:14px;"><button class="btn-ghost" onclick="resetSettings()">기준값 기본값으로 재설정</button></div>
     </div>
   </details>
@@ -642,8 +657,9 @@
       · <b>차상위 본인부담경감</b>은 희귀난치성·중증질환자, 만성질환자(6개월 이상 치료 중이거나 필요), 18세 미만 아동이 대상이며,
         소득인정액이 기준 중위소득 50% 이하인 것 외에 <b>대상자 본인의 부양의무자가 없거나, 있어도 부양능력이 없거나 부양을 받을 수 없어야
         함</b>이 추가로 요구됨<br>
-      · 이 부양능력 판정은 <b>의료급여의 없음·미약·있음 3단계 판정식을 그대로 준용</b>: 부양의무자가 한 명이라도 '있음'이면 제외, '미약'인
-        부양의무자의 부양비(10%)는 소득인정액에 가산되어 50% 기준과 비교됨(⑤ 부양의무자 카드에서 함께 입력·판정)<br>
+      · 이 부양능력 판정은 <b>의료급여의 소득+재산 결합 3단계 판정식과는 별개</b>로, <b>부양의무자의 소득만</b>을 부양의무자 가구 기준
+        중위소득과 비교함(재산의 소득환산액·부양비는 반영하지 않음). 부양의무자 소득이 기준(비율은 "기준값 설정"에서 조정) 이상이면
+        제외, 미만이면 충족(⑤ 부양의무자 카드에서 함께 입력·판정)<br>
       · 실제 대상자 확인(질환 진단서, 자활사업 참여 의사 등)은 관할 기관에서 별도로 판단</p>
 
       <p><b>9. 자산형성지원사업 (희망저축계좌Ⅰ·Ⅱ, 청년내일저축계좌)</b><br>
@@ -1071,6 +1087,36 @@ function dutyEvaluation(A, medianTable){
   };
 }
 
+/* ---------------- 차상위 본인부담경감: 의료급여와 별개인 부양의무자 "소득만" 판정 ----------------
+   의료급여는 소득+재산 결합 3단계(없음·미약·있음) 산식을 쓰지만,
+   차상위 본인부담경감은 부양의무자의 소득만을 보고 판정한다(재산·A·부양비 미반영). */
+function dutyEvaluationNearPoor(medianTable){
+  if(!document.getElementById('dutyEnable').checked) return null;
+  const rows = document.querySelectorAll('[id^=dutyRow_]');
+  if(!rows.length) return null;
+
+  const hhElderlyDisabled = document.getElementById('dutyHhElderlyDisabled').checked;
+  const rate = num('naSupportIncomeRate')/100;
+
+  const results = [];
+  rows.forEach(row=>{
+    const id = row.id.split('_')[1];
+    const label = document.getElementById('dLabel_'+id).value || '부양의무자';
+    const size = num('dSize_'+id) || 1;
+    const income = num('dIncome_'+id);
+    const exception = document.getElementById('dException_'+id).value;
+
+    const B = getMedianForSize(size, medianTable);
+    const incomeLine = B * rate;
+    const exempt = exception === 'severe20' || (exception === 'elderly_disabled' && hhElderlyDisabled);
+    const capable = !exempt && income >= incomeLine;
+
+    results.push({label, B, incomeLine, income, exempt, capable});
+  });
+
+  return { results, anyCapable: results.some(r=>r.capable) };
+}
+
 /* ---------------- 재산의 소득환산액 ---------------- */
 function propertyConversion(){
   const region = document.getElementById('region').value;
@@ -1192,6 +1238,7 @@ function calculate(){
   const duty = dutyEvaluation(median, getMedianTable());
   const totalBuyangbi = duty ? duty.totalBuyangbi : 0;
   const incomeRecogMedical = incomeRecog + totalBuyangbi;
+  const dutyNearPoor = dutyEvaluationNearPoor(getMedianTable());
 
   let basicRecipient = false;
   const qualifiedBenefits = [];
@@ -1228,7 +1275,7 @@ function calculate(){
   });
 
   renderDuty(duty, median);
-  renderNearPoorAndAsset(passMap, median, hhSize, inc, prop, duty, incomeRecogMedical);
+  renderNearPoorAndAsset(passMap, median, hhSize, inc, prop, dutyNearPoor);
   renderPension();
   renderDisabilityAllowance(passMap);
 
@@ -1291,13 +1338,14 @@ function calculate(){
   const dutyWarn = document.getElementById('dutyWarn');
   if(duty && duty.anyCapable){
     dutyWarn.style.display = 'block';
-    dutyWarn.innerHTML = `⚠ 부양능력 '있음'으로 판정된 부양의무자가 있어 <b>의료급여 및 차상위 본인부담경감 수급자에 해당하지 않는 것</b>으로 추정됩니다(동일한 부양능력 판정식을 준용). 다만 가족관계 단절 등으로 실제 부양을 받을 수 없는 경우에는 부양의무자 기준을 충족한 것으로 볼 수 있으므로 관할 시·군·구의 사실조사가 필요합니다. 생계·주거·교육급여와 차상위계층확인·차상위자활·한부모가족 기준에는 이 부양능력 판정이 적용되지 않습니다.`;
+    dutyWarn.innerHTML = `⚠ 부양능력 '있음'으로 판정된 부양의무자가 있어 <b>의료급여 수급자에 해당하지 않는 것</b>으로 추정됩니다(소득+재산 3단계 판정). 다만 가족관계 단절 등으로 실제 부양을 받을 수 없는 경우에는 부양의무자 기준을 충족한 것으로 볼 수 있으므로 관할 시·군·구의 사실조사가 필요합니다. 생계·주거·교육급여와 차상위계층확인·차상위자활·한부모가족 기준에는 이 부양능력 판정이 적용되지 않습니다. 차상위 본인부담경감의 부양의무자 판정은 별개 산식(소득만 비교)이며 아래 "차상위 세부사업" 표에서 별도로 확인하세요.`;
   } else if(duty){
     dutyWarn.style.display = 'block';
-    let msg = `등록한 부양의무자 모두 부양능력 <b>'있음'에 해당하지 않아</b> 의료급여·차상위 본인부담경감의 부양의무자 기준을 충족하는 것으로 추정됩니다.`;
+    let msg = `등록한 부양의무자 모두 부양능력 <b>'있음'에 해당하지 않아</b> 의료급여 부양의무자 기준을 충족하는 것으로 추정됩니다.`;
     if(totalBuyangbi > 0){
-      msg += ` 다만 부양능력 '미약'인 부양의무자의 부양비 ${fmt(totalBuyangbi)}이 의료급여·차상위 본인부담경감 판정용 소득에 합산되어(소득인정액 ${fmt(incomeRecogMedical)}), 생계·주거·교육급여 등 다른 급여 판정과 결과가 달라질 수 있습니다.`;
+      msg += ` 다만 부양능력 '미약'인 부양의무자의 부양비 ${fmt(totalBuyangbi)}이 의료급여 판정용 소득에 합산되어(소득인정액 ${fmt(incomeRecogMedical)}), 생계·주거·교육급여 등 다른 급여 판정과 결과가 달라질 수 있습니다.`;
     }
+    msg += ` 차상위 본인부담경감의 부양의무자 판정(소득만 비교)은 별개이며 아래 "차상위 세부사업" 표에서 확인하세요.`;
     dutyWarn.style.display = 'block';
     dutyWarn.innerHTML = msg;
   } else {
@@ -1373,25 +1421,24 @@ function renderDuty(duty, A){
 }
 
 /* ---------------- 차상위 세부사업 · 자산형성지원사업 ---------------- */
-function renderNearPoorAndAsset(passMap, median, hhSize, inc, prop, duty, incomeRecogMedical){
+function renderNearPoorAndAsset(passMap, median, hhSize, inc, prop, dutyNearPoor){
   const nearPoorPass = passMap['차상위계층'];
   const workAble = document.getElementById('nearWorkAble').checked;
   const medicalTarget = document.getElementById('nearMedicalTarget').checked;
 
-  // 차상위 본인부담경감대상자는 의료급여 부양능력 판정(없음·미약·있음, 부양비 포함)을 그대로 준용
-  const medicalThreshold = median * (num('rNearPoor')/100);
-  const medicalIncomeOk = incomeRecogMedical <= medicalThreshold;
-  const dutyCapable = !!(duty && duty.anyCapable);
+  // 차상위 본인부담경감대상자의 부양의무자 기준: 의료급여(소득+재산 3단계, 부양비)와는 별개로
+  // 부양의무자의 "소득"만 부양의무자 가구 기준 중위소득과 비교한다(재산·부양비 미반영).
+  const dutyCapable = !!(dutyNearPoor && dutyNearPoor.anyCapable);
   const medicalReducedNeed = dutyCapable
-    ? '중위소득 50% 이하 + 대상질환·아동(⑥) — 부양의무자 부양능력 "있음"으로 기준 초과'
-    : '중위소득 50% 이하(부양비 반영) + 대상질환·아동(⑥) + 부양의무자 부양능력 없음·미약(의료급여 판정 준용)';
+    ? `중위소득 50% 이하 + 대상질환·아동(⑥) — 부양의무자 소득이 기준(부양의무자 가구 중위소득의 ${num('naSupportIncomeRate')}%) 초과`
+    : `중위소득 50% 이하 + 대상질환·아동(⑥) + 부양의무자 소득이 기준(부양의무자 가구 중위소득의 ${num('naSupportIncomeRate')}%) 이하 (재산 미반영, 의료급여와 별개 산식)`;
 
   const npTbody = document.querySelector('#nearPoorTable tbody');
   npTbody.innerHTML = '';
   const npRows = [
     {label:'차상위계층확인', need:'기준 중위소득 50% 이하 (부양의무자 기준 미적용)', pass: nearPoorPass},
     {label:'차상위자활', need:'중위소득 50% 이하 + 근로능력 있음(⑥ 체크박스, 부양의무자 기준 미적용)', pass: nearPoorPass && workAble},
-    {label:'차상위 본인부담경감', need: medicalReducedNeed, pass: medicalTarget && medicalIncomeOk && !dutyCapable}
+    {label:'차상위 본인부담경감', need: medicalReducedNeed, pass: medicalTarget && nearPoorPass && !dutyCapable}
   ];
   npRows.forEach(r=>{
     const tr = document.createElement('tr');
@@ -1402,6 +1449,18 @@ function renderNearPoorAndAsset(passMap, median, hhSize, inc, prop, duty, income
     `;
     npTbody.appendChild(tr);
   });
+
+  if(dutyNearPoor && dutyNearPoor.results.length){
+    let dbd = `<b>■ 차상위 본인부담경감 부양의무자 판정 (소득만 비교, 재산·부양비 미반영)</b><br>`;
+    dutyNearPoor.results.forEach(r=>{
+      if(r.exempt){
+        dbd += `${r.label}: 기준 미적용 (완전면제 특례)<br>`;
+      } else {
+        dbd += `${r.label}: 소득 ${fmt(r.income)} ${r.capable?'≥':'<'} 기준 ${fmt(r.incomeLine)}(B ${fmt(r.B)} × ${num('naSupportIncomeRate')}%) → ${r.capable?'부양능력 있음(제외)':'부양능력 없음(충족)'}<br>`;
+      }
+    });
+    document.getElementById('nearPoorDutyDetail') && (document.getElementById('nearPoorDutyDetail').innerHTML = dbd);
+  }
 
   // 자산형성지원사업 (희망저축계좌Ⅰ·Ⅱ, 청년내일저축계좌)
   const age = num('assetAge');
@@ -1677,6 +1736,7 @@ function resetSettings(){
   document.getElementById('dRateB').value = 100;
   document.getElementById('dRateSoft').value = 74;
   document.getElementById('dRateProp').value = 18;
+  document.getElementById('naSupportIncomeRate').value = 100;
   document.getElementById('pBasicSingle').value = 2470000;
   document.getElementById('pBasicCouple').value = 3952000;
   document.getElementById('pDisabilitySingle').value = 1400000;
