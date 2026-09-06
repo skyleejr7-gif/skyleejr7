@@ -134,7 +134,7 @@
   <!-- 소득 정보 -->
   <div class="card">
     <h2>② 소득 정보</h2>
-    <p class="sub">근로·사업소득은 가구원별로 나누어 입력해야 공제 특례가 정확히 반영됩니다. 공제 항목이 둘 이상 해당하면 가장 유리한 하나만 적용합니다.</p>
+    <p class="sub">근로·사업소득은 <b>가구원(관계)별</b>로 나누어 입력해야 공제 특례가 정확히 반영됩니다. 공제 항목이 둘 이상 해당하면 가장 유리한 하나만 적용합니다.</p>
 
     <h3 class="mini">근로·사업소득자 (가구원별)</h3>
     <div id="incomeRows"></div>
@@ -169,27 +169,20 @@
   <!-- 재산 정보 -->
   <div class="card">
     <h2>③ 일반재산 · 금융재산</h2>
-    <p class="sub">시가표준액(공시가격)·보증금·잔액 기준으로 입력하세요. 주거용재산은 지역별 한도액까지만 주거용으로 인정되고, 초과분은 일반재산으로 산정됩니다.</p>
-    <div class="grid">
-      <div class="field">
-        <label>주거용 재산 (거주 중인 주택 공시가격 / 임차보증금)</label>
-        <input type="text" inputmode="numeric" class="money" id="housingProperty" min="0" value="0">
-        <div class="hint">해당 주택에 실제 거주하지 않으면 일반재산으로 입력하세요. 임차보증금은 적용률 0.95를 곱한 금액입니다.</div>
-      </div>
-      <div class="field">
-        <label>일반재산 (토지·건축물·비거주 주택 등)</label>
-        <input type="text" inputmode="numeric" class="money" id="generalProperty" min="0" value="0">
-      </div>
-      <div class="field">
-        <label>금융재산 (예적금·주식·보험 등)</label>
-        <input type="text" inputmode="numeric" class="money" id="financialProperty" min="0" value="0">
-      </div>
-      <div class="field">
-        <label>부채 (차감 대상 부채 총액)</label>
-        <input type="text" inputmode="numeric" class="money" id="debt" min="0" value="0">
-        <div class="hint">금융회사 대출금, 임대보증금 부채, 법원에 의해 확인된 사채 등</div>
-      </div>
+    <p class="sub">
+      재산 항목마다 <b>소유 가구원(관계)</b>과 종류를 선택해 입력하세요. 시가표준액(공시가격)·보증금·잔액 기준이며,
+      주거용재산은 지역별 한도액까지만 주거용으로 인정되고 초과분은 일반재산으로 산정됩니다. 임차보증금은 적용률
+      0.95를 곱해 입력하세요. 모든 항목의 합계가 자동으로 계산에 반영됩니다.
+    </p>
+    <div id="propertyRows"></div>
+    <div class="actions"><button class="btn-add" onclick="addPropertyRow()">+ 재산 항목 추가</button></div>
+    <div class="kv" style="margin-top:10px;"><span class="k">가구 전체 재산 합계</span>
+      <span class="v" id="propertyTotalsSummary">주거용 0원 · 일반 0원 · 금융 0원 · 부채 0원</span>
     </div>
+    <input type="hidden" id="housingProperty" value="0">
+    <input type="hidden" id="generalProperty" value="0">
+    <input type="hidden" id="financialProperty" value="0">
+    <input type="hidden" id="debt" value="0">
 
     <label class="chk" style="margin-top:14px;"><input type="checkbox" id="propExemptToggle"> 재산범위 특례 검토 (가구원 전원이 근로무능력자 &amp; 재산 처분이 곤란한 가구)</label>
     <div class="hint" style="margin:6px 0 0;">
@@ -202,7 +195,7 @@
   <!-- 자동차 정보 -->
   <div class="card">
     <h2>④ 자동차 재산</h2>
-    <p class="sub">차량을 한 대씩 등록하세요. 차종·배기량·차령·용도에 따라 <b>재산산정 제외 / 일반재산 환산율(4.17%) / 원칙(월 100%)</b>으로 자동 분류합니다.</p>
+    <p class="sub">차량을 한 대씩 <b>소유 가구원(관계)</b>과 함께 등록하세요. 차종·배기량·차령·용도에 따라 <b>재산산정 제외 / 일반재산 환산율(4.17%) / 원칙(월 100%)</b>으로 자동 분류합니다(보유 한도는 가구 전체 기준으로 판정).</p>
     <div id="vehicleRows"></div>
     <div class="actions"><button class="btn-add" onclick="addVehicleRow()">+ 차량 추가</button></div>
     <div class="hint" style="margin-top:10px;">
@@ -803,6 +796,27 @@ function syncRegionHint(){
     `기본재산액 ${fmt(num(ded))} / 주거용재산 한도액 ${fmt(num(cap))}`;
 }
 
+/* ---------------- 가구원 관계 공통 ---------------- */
+const HOUSEHOLD_RELATIONS = {
+  self: '본인',
+  spouse: '배우자',
+  son: '자(아들)',
+  daughter: '자(딸)',
+  father: '부(父)',
+  mother: '모(母)',
+  other: '기타'
+};
+function householdRelationOptions(selected){
+  return Object.entries(HOUSEHOLD_RELATIONS).map(([k,l])=>
+    `<option value="${k}" ${selected===k?'selected':''}>${l}</option>`).join('');
+}
+function householdMemberLabel(relationId, labelId){
+  const relKey = document.getElementById(relationId).value;
+  const relLabel = HOUSEHOLD_RELATIONS[relKey] || '가구원';
+  const customName = document.getElementById(labelId) ? document.getElementById(labelId).value : '';
+  return customName ? `${relLabel}(${customName})` : relLabel;
+}
+
 /* ---------------- 근로·사업소득자 행 ---------------- */
 const LABOR_CATEGORIES = {
   none:   {label:'해당없음 (기본 30% 공제)',                       flat:0,          rate:'base'},
@@ -814,7 +828,7 @@ const LABOR_CATEGORIES = {
 };
 
 let incomeRowId = 0;
-function addIncomeRow(amount=0, category='none', label=''){
+function addIncomeRow(amount=0, category='none', label='', relation='self'){
   incomeRowId++;
   const id = incomeRowId;
   let opts = '';
@@ -825,14 +839,16 @@ function addIncomeRow(amount=0, category='none', label=''){
   wrap.className = 'dyn-row';
   wrap.id = 'incomeRow_'+id;
   wrap.innerHTML = `
-    <div class="field"><label>가구원 구분</label>
-      <input type="text" id="incLabel_${id}" placeholder="예: 본인, 배우자" value="${label}">
+    <div class="field"><label>관계</label>
+      <select id="incRelation_${id}">${householdRelationOptions(relation)}</select>
     </div>
     <div class="field"><label>월 근로·사업소득</label><input type="text" inputmode="numeric" class="money" id="incAmount_${id}" min="0" value="${amount}"></div>
     <div class="field"><label>공제 특례 (가장 유리한 항목 1개)</label>
       <select id="incCategory_${id}">${opts}</select>
     </div>
-    <div></div>
+    <div class="field"><label>이름(선택)</label>
+      <input type="text" id="incLabel_${id}" placeholder="예: 민수" value="${label}">
+    </div>
     <button class="btn-del" onclick="document.getElementById('incomeRow_${id}').remove()">삭제</button>
   `;
   document.getElementById('incomeRows').appendChild(wrap);
@@ -849,15 +865,71 @@ function laborDeductionAmount(income, category){
   return applied + Math.max(0, income-flat)*rate;
 }
 
+/* ---------------- 재산 항목 (가구원별) ---------------- */
+const PROPERTY_TYPES = {
+  housing:   {label:'주거용재산', target:'housingProperty'},
+  general:   {label:'일반재산',   target:'generalProperty'},
+  financial: {label:'금융재산',   target:'financialProperty'},
+  debt:      {label:'부채',       target:'debt'}
+};
+let propertyRowId = 0;
+function addPropertyRow(type='housing', amount=0, relation='self', label=''){
+  propertyRowId++;
+  const id = propertyRowId;
+  const typeOpts = Object.entries(PROPERTY_TYPES).map(([k,t])=>
+    `<option value="${k}" ${type===k?'selected':''}>${t.label}</option>`).join('');
+  const wrap = document.createElement('div');
+  wrap.className = 'dyn-row';
+  wrap.id = 'propertyRow_'+id;
+  wrap.innerHTML = `
+    <div class="field"><label>소유 가구원(관계)</label>
+      <select id="propRelation_${id}">${householdRelationOptions(relation)}</select>
+    </div>
+    <div class="field"><label>재산 종류</label>
+      <select id="propType_${id}" onchange="recomputePropertyTotals()">${typeOpts}</select>
+    </div>
+    <div class="field"><label>금액</label>
+      <input type="text" inputmode="numeric" class="money" id="propAmount_${id}" min="0" value="${amount}" oninput="recomputePropertyTotals()">
+    </div>
+    <div class="field"><label>이름(선택)</label>
+      <input type="text" id="propLabel_${id}" placeholder="예: 민수" value="${label}">
+    </div>
+    <button class="btn-del" onclick="document.getElementById('propertyRow_${id}').remove(); recomputePropertyTotals();">삭제</button>
+  `;
+  document.getElementById('propertyRows').appendChild(wrap);
+  syncMoneyInputs(wrap);
+  recomputePropertyTotals();
+}
+function recomputePropertyTotals(){
+  const totals = {housing:0, general:0, financial:0, debt:0};
+  document.querySelectorAll('[id^=propertyRow_]').forEach(row=>{
+    const id = row.id.split('_')[1];
+    const type = document.getElementById('propType_'+id).value;
+    const amount = num('propAmount_'+id);
+    totals[type] += amount;
+  });
+  document.getElementById('housingProperty').value = totals.housing;
+  document.getElementById('generalProperty').value = totals.general;
+  document.getElementById('financialProperty').value = totals.financial;
+  document.getElementById('debt').value = totals.debt;
+  const summary = document.getElementById('propertyTotalsSummary');
+  if(summary){
+    summary.textContent = `주거용 ${fmt(totals.housing)} · 일반 ${fmt(totals.general)} · 금융 ${fmt(totals.financial)} · 부채 ${fmt(totals.debt)}`;
+  }
+}
+
 /* ---------------- 자동차 행 ---------------- */
 let vehicleRowId = 0;
-function addVehicleRow(type='car', displacement=1998, value=0, old10=false, use='general'){
+function addVehicleRow(type='car', displacement=1998, value=0, old10=false, use='general', relation='self'){
   vehicleRowId++;
   const id = vehicleRowId;
   const wrap = document.createElement('div');
   wrap.className = 'vrow';
   wrap.id = 'vehicleRow_'+id;
   wrap.innerHTML = `
+    <div class="field"><label>소유 가구원(관계)</label>
+      <select id="vRelation_${id}">${householdRelationOptions(relation)}</select>
+    </div>
     <div class="field"><label>차종</label>
       <select id="vType_${id}">
         <option value="car" ${type==='car'?'selected':''}>승용자동차</option>
@@ -930,6 +1002,7 @@ function collectVehicles(){
   document.querySelectorAll('[id^=vehicleRow_]').forEach(row=>{
     const id = row.id.split('_')[1];
     list.push({
+      owner: householdMemberLabel('vRelation_'+id, null),
       type: document.getElementById('vType_'+id).value,
       disp: num('vDisp_'+id),
       value: num('vValue_'+id),
@@ -1275,7 +1348,7 @@ function incomeEvaluation(){
     const id = row.id.split('_')[1];
     const amount = num('incAmount_'+id);
     const category = document.getElementById('incCategory_'+id).value;
-    const label = document.getElementById('incLabel_'+id).value || '가구원';
+    const label = householdMemberLabel('incRelation_'+id, 'incLabel_'+id);
     const ded = laborDeductionAmount(amount, category);
     laborTotal += amount;
     laborDeductedTotal += ded;
@@ -1391,6 +1464,17 @@ function calculate(){
   bd += `가구특성별 지출비용 차감: −${fmt(inc.hhExpense)}<br>`;
   bd += `소득평가액 = ${fmt(inc.incomeAssessment)}<br><br>`;
 
+  const propItems = [];
+  document.querySelectorAll('[id^=propertyRow_]').forEach(row=>{
+    const pid = row.id.split('_')[1];
+    const type = document.getElementById('propType_'+pid).value;
+    const amount = num('propAmount_'+pid);
+    const owner = householdMemberLabel('propRelation_'+pid, 'propLabel_'+pid);
+    propItems.push(`${owner} - ${PROPERTY_TYPES[type].label} ${fmt(amount)}`);
+  });
+  if(propItems.length){
+    bd += `<b>■ 가구원별 재산 항목</b><br>${propItems.join('<br>')}<br><br>`;
+  }
   bd += `<b>■ 재산 상세</b> (거주지역 ${REGION_LABEL[document.getElementById('region').value]}, 기본재산액 ${fmt(prop.basicDeduction)}, 부채 ${fmt(prop.debt)}, 금융 생활준비금 공제 ${fmt(prop.finBasic)})<br>`;
   if(prop.housingExcess > 0){
     bd += `주거용재산 한도액 ${fmt(prop.housingCap)} 초과분 ${fmt(prop.housingExcess)}은 일반재산으로 산정<br>`;
@@ -1410,7 +1494,7 @@ function calculate(){
     bd += `<br><b>■ 자동차 분류</b><br>`;
     prop.vehicles.forEach((v,i)=>{
       const clsLabel = v.cls==='exclude' ? '재산산정 제외' : (v.cls==='reduced' ? `일반재산 환산율(${num('rateGeneral')}%)` : `원칙(월 ${num('rateCar')}%)`);
-      bd += `${i+1}번 차량 (${v.disp}cc, ${fmt(v.value)}) → ${clsLabel} — ${v.note}<br>`;
+      bd += `${i+1}번 차량 [${v.owner}] (${v.disp}cc, ${fmt(v.value)}) → ${clsLabel} — ${v.note}<br>`;
     });
   }
   bd += `<br>재산의 소득환산액 = ${fmt(prop.total)}<br>`;
@@ -1708,9 +1792,11 @@ function renderDisabilityAllowance(passMap){
 function resetAll(){
   document.getElementById('incomeRows').innerHTML = '';
   document.getElementById('vehicleRows').innerHTML = '';
-  addIncomeRow(0,'none','본인');
+  document.getElementById('propertyRows').innerHTML = '';
+  addIncomeRow(0,'none','','self');
   addVehicleRow();
-  ['propertyIncome','publicTransfer','privateTransfer','hhExpense','housingProperty','generalProperty','financialProperty','debt'].forEach(id=>{
+  addPropertyRow('housing', 0, 'self');
+  ['propertyIncome','publicTransfer','privateTransfer','hhExpense'].forEach(id=>{
     document.getElementById(id).value = 0;
   });
   document.getElementById('hhSize').value = 3;
@@ -1743,19 +1829,19 @@ function resetAll(){
 function fillSample(){
   document.getElementById('incomeRows').innerHTML = '';
   document.getElementById('vehicleRows').innerHTML = '';
+  document.getElementById('propertyRows').innerHTML = '';
   document.getElementById('hhSize').value = 3;
   document.getElementById('region').value = 'other';
-  addIncomeRow(900000,'none','본인');
-  addIncomeRow(700000,'young','자녀(대학생)');
+  addIncomeRow(900000,'none','','self');
+  addIncomeRow(700000,'young','대학생','son');
   document.getElementById('propertyIncome').value = 0;
   document.getElementById('publicTransfer').value = 300000;
   document.getElementById('privateTransfer').value = 0;
   document.getElementById('hhExpense').value = 100000;
-  document.getElementById('housingProperty').value = 45000000;
-  document.getElementById('generalProperty').value = 0;
-  document.getElementById('financialProperty').value = 3000000;
-  document.getElementById('debt').value = 5000000;
-  addVehicleRow('car',1600,3000000,true,'general');
+  addPropertyRow('housing', 45000000, 'self');
+  addPropertyRow('financial', 3000000, 'self');
+  addPropertyRow('debt', 5000000, 'self');
+  addVehicleRow('car',1600,3000000,true,'general','self');
   document.getElementById('propExemptToggle').checked = false;
   document.getElementById('dutyRows').innerHTML = '';
   document.getElementById('dutyEnable').checked = true;
@@ -1856,8 +1942,9 @@ function resetSettings(){
 
 /* ---------------- 초기 로드 ---------------- */
 buildMedianGrid();
-addIncomeRow(0,'none','본인');
+addIncomeRow(0,'none','','self');
 addVehicleRow();
+addPropertyRow('housing', 0, 'self');
 syncRegionHint();
 syncMoneyInputs();
 </script>
