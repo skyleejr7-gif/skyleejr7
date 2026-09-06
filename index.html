@@ -67,6 +67,7 @@
   .pill.ok{background:var(--ok-bg);color:var(--ok-fg);}
   .pill.no{background:var(--no-bg);color:var(--no-fg);}
   .pill.warn{background:var(--warn-bg);color:var(--warn-fg);}
+  .pill.muted{background:#eef1f6;color:var(--muted);}
   .summaryBox{border-radius:10px;padding:16px 18px;margin-bottom:16px;font-size:14px;}
   .summaryBox.ok{background:var(--ok-bg);border:1px solid #b7e6c7;color:var(--ok-fg);}
   .summaryBox.no{background:var(--no-bg);border:1px solid #f3c8c4;color:var(--no-fg);}
@@ -222,11 +223,13 @@
 
     <label class="chk"><input type="checkbox" id="dutyEnable" checked> 부양의무자 판정 포함</label>
     <div class="hint" style="margin:6px 0 14px;">
-      부양의무자는 1촌의 직계혈족(부모·자녀) 및 그 배우자입니다. <b>의료급여</b>는 한 명이라도 부양능력 '있음'(소득+재산 3단계)이면
-      수급자에서 제외되고, '미약'으로 판정된 부양의무자는 부양비(판정소득액이 B 초과분의 10%)가 수급(권)자 가구 소득에 합산됩니다.
-      <b>차상위 본인부담경감</b>은 이와 별개로 부양의무자의 소득만을 부양의무자 가구 기준 중위소득과 비교합니다(재산·부양비 미반영,
-      "기준값 설정"에서 비율 조정 가능). 수급(권)자가 30세 미만 한부모가구·자립준비청년(보호종료아동)인 경우는 부양의무자 기준 자체가
-      적용되지 않으므로 등록하지 마십시오.
+      부양의무자는 <b>1촌의 직계혈족(부모·자녀) 및 그 배우자, 배우자</b>입니다. 각 부양의무자의 <b>가족관계</b>를 아래에서 선택하면
+      법적 부양의무자 범위인지 자동으로 판별됩니다 — 형제자매·조부모·이모/고모/삼촌 등은 부양의무자 범위가 아니므로 등록해도
+      판정에는 반영되지 않고 참고용으로만 표시됩니다. <b>의료급여</b>는 법적 부양의무자 한 명이라도 부양능력 '있음'(소득+재산
+      3단계)이면 수급자에서 제외되고, '미약'으로 판정된 부양의무자는 부양비(판정소득액이 B 초과분의 10%)가 수급(권)자 가구 소득에
+      합산됩니다. <b>차상위 본인부담경감</b>은 이와 별개로 부양의무자의 소득만을 부양의무자 가구 기준 중위소득과 비교합니다
+      (재산·부양비 미반영, "기준값 설정"에서 비율 조정 가능). 수급(권)자가 30세 미만 한부모가구·자립준비청년(보호종료아동)인
+      경우는 부양의무자 기준 자체가 적용되지 않으므로 등록하지 마십시오.
     </div>
 
     <label class="chk"><input type="checkbox" id="dutyHhElderlyDisabled"> 수급(권)자 가구에 65세 이상 노인 또는 장애정도가 심한 장애인(중증)이 포함됨</label>
@@ -627,6 +630,9 @@
 
       <p><b>4. 판정</b> = 소득인정액 ≤ (가구원 수별 기준 중위소득 × 급여·제도별 선정기준 비율)</p>
       <p><b>5. 부양의무자 부양능력 판정 (의료급여, 없음·미약·있음 3단계)</b><br>
+      · <b>부양의무자 범위</b>: 1촌의 직계혈족(부(父)·모(母)·자녀)과 그 배우자(며느리·사위), 배우자. 형제자매(형·오빠·누나·언니·
+        남동생·여동생), 조부모, 이모·고모·삼촌 등은 부양의무자 범위가 아니므로 ⑤에서 가족관계를 선택하면 자동으로 판정에서
+        제외되고 "비대상"으로 참고 표시만 됩니다(의료급여·차상위 본인부담경감·생계급여 고소득·고재산 예외조항 모두 동일)<br>
       · A = 수급(권)자 가구의 기준 중위소득, B = 부양의무자 가구의 기준 중위소득<br>
       · 부양능력 없음: 판정소득액 &lt; B×100% 이고, 재산의 소득환산액 &lt; (A+B)×18%<br>
       · 부양능력 미약: 판정소득액이 B×100% 이상이면서 (A×40%)+(B×100%) 미만이고, 재산의 소득환산액 &lt; (A+B)×18% —
@@ -955,8 +961,22 @@ function collectVehicles(){
 }
 
 /* ---------------- 부양의무자 가구 ---------------- */
+const RELATION_TYPES = {
+  father:    {label:'부(父)', legal:true},
+  mother:    {label:'모(母)', legal:true},
+  spouse:    {label:'배우자', legal:true},
+  child:     {label:'자녀(자)', legal:true},
+  childSpouse:{label:'자녀의 배우자(며느리·사위)', legal:true},
+  grandparent:{label:'조부모', legal:false},
+  brother:   {label:'형/오빠', legal:false},
+  sister:    {label:'누나/언니', legal:false},
+  sibling_younger:{label:'남동생/여동생', legal:false},
+  auntUncle: {label:'이모/고모/삼촌 등 기타 친족', legal:false},
+  other:     {label:'기타(직접 입력)', legal:false}
+};
+
 let dutyRowId = 0;
-function addDutyRow(label='', size=2, region='other'){
+function addDutyRow(label='', size=2, region='other', relation='father'){
   dutyRowId++;
   const id = dutyRowId;
   const wrap = document.createElement('div');
@@ -965,8 +985,18 @@ function addDutyRow(label='', size=2, region='other'){
   wrap.id = 'dutyRow_'+id;
   wrap.innerHTML = `
     <div class="grid">
-      <div class="field"><label>부양의무자 구분</label>
-        <input type="text" id="dLabel_${id}" placeholder="예: 장남, 부(父)" value="${label}">
+      <div class="field"><label>가족관계</label>
+        <select id="dRelation_${id}" onchange="document.getElementById('dRelationOtherWrap_${id}').hidden = (this.value !== 'other'); renderDutyRelationWarn(${id});">
+          ${Object.entries(RELATION_TYPES).map(([key,r])=>`<option value="${key}" ${relation===key?'selected':''}>${r.label}${r.legal?'':' (법적 부양의무자 아님)'}</option>`).join('')}
+        </select>
+        <div id="dRelationWarn_${id}" class="hint" style="color:var(--no-fg);display:none;"></div>
+      </div>
+      <div class="field" id="dRelationOtherWrap_${id}" ${relation==='other'?'':'hidden'}>
+        <label>가족관계 직접 입력</label>
+        <input type="text" id="dRelationOther_${id}" placeholder="예: 사촌, 4촌 이내 방계혈족 등" value="" oninput="renderDutyRelationWarn(${id})">
+      </div>
+      <div class="field"><label>부양의무자 구분(이름·호칭, 선택)</label>
+        <input type="text" id="dLabel_${id}" placeholder="예: 장남, 첫째 딸" value="${label}">
       </div>
       <div class="field"><label>부양능력판정 가구원 수</label>
         <input type="number" id="dSize_${id}" min="1" max="12" value="${size}">
@@ -1012,6 +1042,28 @@ function addDutyRow(label='', size=2, region='other'){
   `;
   document.getElementById('dutyRows').appendChild(wrap);
   syncMoneyInputs(wrap);
+  renderDutyRelationWarn(id);
+}
+
+function getDutyRelationInfo(id){
+  const key = document.getElementById('dRelation_'+id).value;
+  const type = RELATION_TYPES[key] || RELATION_TYPES.other;
+  const customLabel = document.getElementById('dRelationOther_'+id).value;
+  const label = key === 'other' && customLabel ? customLabel : type.label;
+  return {key, legal: type.legal, label};
+}
+
+function renderDutyRelationWarn(id){
+  const warn = document.getElementById('dRelationWarn_'+id);
+  if(!warn) return;
+  const info = getDutyRelationInfo(id);
+  if(info.legal){
+    warn.style.display = 'none';
+  } else {
+    warn.style.display = 'block';
+    warn.innerHTML = `⚠ "${info.label}"은(는) 「국민기초생활보장법」상 부양의무자 범위(1촌의 직계혈족인 부모·자녀 및 그 배우자, 배우자)에
+      해당하지 않아 이 사람은 부양능력 판정·부양비·고소득고재산 예외조항에서 자동으로 제외되고 참고용으로만 표시됩니다.`;
+  }
 }
 
 function dutyPropertyConversion(v){
@@ -1051,8 +1103,11 @@ function dutyEvaluation(A, medianTable){
   const results = [];
   rows.forEach(row=>{
     const id = row.id.split('_')[1];
+    const relation = getDutyRelationInfo(id);
+    const customLabel = document.getElementById('dLabel_'+id).value;
     const v = {
-      label: document.getElementById('dLabel_'+id).value || '부양의무자',
+      label: customLabel ? `${customLabel}(${relation.label})` : relation.label,
+      relation,
       size: num('dSize_'+id) || 1,
       region: document.getElementById('dRegion_'+id).value,
       exception: document.getElementById('dException_'+id).value,
@@ -1072,16 +1127,19 @@ function dutyEvaluation(A, medianTable){
 
     const prop = dutyPropertyConversion(v);
 
-    // 생계급여: 고소득·고재산 부양의무자 예외조항 (의료급여 판정과 별개로 독립 적용)
+    // 생계급여: 고소득·고재산 부양의무자 예외조항 (의료급여 판정과 별개로 독립 적용, 법적 부양의무자만 해당)
     const highAssetValue = v.housing + v.general + v.car; // 금융재산 제외
-    const highIncome = v.annualIncome >= highIncomeLimit;
-    const highAsset = highAssetValue >= highAssetLimit;
+    const highIncome = relation.legal && v.annualIncome >= highIncomeLimit;
+    const highAsset = relation.legal && highAssetValue >= highAssetLimit;
 
     // 의료급여: 부양의무자 기준 완전 미적용 특례 (노인·중증장애인 조합 / 20세 이하 중복장애인)
     const exempt = v.exception === 'severe20' || (v.exception === 'elderly_disabled' && hhElderlyDisabled);
 
     let tier, buyangbi = 0, reason;
-    if(exempt){
+    if(!relation.legal){
+      tier = '비대상';
+      reason = `"${relation.label}"은 법적 부양의무자(1촌 직계혈족 및 그 배우자·배우자) 범위가 아니어서 판정에서 제외됨(참고용 표시)`;
+    } else if(exempt){
       tier = '미적용';
       reason = v.exception==='severe20'
         ? '20세 이하 1·2·3급 중복 등록장애인 포함: 기준 미적용'
@@ -1128,7 +1186,9 @@ function dutyEvaluationNearPoor(medianTable){
   const results = [];
   rows.forEach(row=>{
     const id = row.id.split('_')[1];
-    const label = document.getElementById('dLabel_'+id).value || '부양의무자';
+    const relation = getDutyRelationInfo(id);
+    const customLabel = document.getElementById('dLabel_'+id).value;
+    const label = customLabel ? `${customLabel}(${relation.label})` : relation.label;
     const size = num('dSize_'+id) || 1;
     const income = num('dIncome_'+id);
     const exception = document.getElementById('dException_'+id).value;
@@ -1136,9 +1196,10 @@ function dutyEvaluationNearPoor(medianTable){
     const B = getMedianForSize(size, medianTable);
     const incomeLine = B * rate;
     const exempt = exception === 'severe20' || (exception === 'elderly_disabled' && hhElderlyDisabled);
-    const capable = !exempt && income >= incomeLine;
+    const capable = relation.legal && !exempt && income >= incomeLine;
+    const notLegal = !relation.legal;
 
-    results.push({label, B, incomeLine, income, exempt, capable});
+    results.push({label, relation, B, incomeLine, income, exempt, notLegal, capable});
   });
 
   return { results, anyCapable: results.some(r=>r.capable) };
@@ -1401,7 +1462,8 @@ function renderDuty(duty, A){
   if(!duty){ card.style.display = 'none'; return; }
   card.style.display = 'block';
 
-  const tierPill = t => t==='있음' ? 'no' : (t==='미약' ? 'warn' : 'ok');
+  const tierPill = t => t==='있음' ? 'no' : (t==='미약' ? 'warn' : (t==='비대상' ? 'muted' : 'ok'));
+  const skipLine = r => r.exempt || r.tier==='비대상';
   const tbody = document.querySelector('#dutyTable tbody');
   tbody.innerHTML = '';
   duty.results.forEach(r=>{
@@ -1409,9 +1471,9 @@ function renderDuty(duty, A){
     tr.innerHTML = `
       <td>${r.v.label} (${r.v.size}인, ${REGION_LABEL[r.v.region]})</td>
       <td>${fmt(r.v.income)}</td>
-      <td>${r.exempt ? '미적용' : fmt(r.incomeLine)}</td>
+      <td>${skipLine(r) ? (r.tier==='비대상'?'비대상':'미적용') : fmt(r.incomeLine)}</td>
       <td>${fmt(r.prop.conversion)}</td>
-      <td>${r.exempt ? '미적용' : fmt(r.propLine)}</td>
+      <td>${skipLine(r) ? (r.tier==='비대상'?'비대상':'미적용') : fmt(r.propLine)}</td>
       <td><span class="pill ${tierPill(r.tier)}">부양능력 ${r.tier}</span></td>
       <td>${r.buyangbi>0 ? fmt(r.buyangbi) : '-'}</td>
       <td>${(r.highIncome||r.highAsset) ? `<span class="pill no">해당</span>` : '해당없음'}</td>
@@ -1431,7 +1493,9 @@ function renderDuty(duty, A){
 
   duty.results.forEach(r=>{
     bd += `<b>■ ${r.v.label}</b> — B(${r.v.size}인 가구 기준 중위소득) = ${fmt(r.B)}<br>`;
-    if(r.exempt){
+    if(r.tier==='비대상'){
+      bd += `의료급여 부양의무자 기준: <b>비대상</b> (${r.reason})<br>`;
+    } else if(r.exempt){
       bd += `의료급여 부양의무자 기준: <b>미적용</b> (${r.reason})<br>`;
     } else {
       bd += `소득기준 ${fmt(r.incomeLine)}`;
@@ -1480,7 +1544,9 @@ function renderNearPoorAndAsset(passMap, median, hhSize, inc, prop, dutyNearPoor
   if(dutyNearPoor && dutyNearPoor.results.length){
     let dbd = `<b>■ 차상위 본인부담경감 부양의무자 판정 (소득만 비교, 재산·부양비 미반영)</b><br>`;
     dutyNearPoor.results.forEach(r=>{
-      if(r.exempt){
+      if(r.notLegal){
+        dbd += `${r.label}: 법적 부양의무자 범위 아님 — 비대상(참고용)<br>`;
+      } else if(r.exempt){
         dbd += `${r.label}: 기준 미적용 (완전면제 특례)<br>`;
       } else {
         dbd += `${r.label}: 소득 ${fmt(r.income)} ${r.capable?'≥':'<'} 기준 ${fmt(r.incomeLine)}(B ${fmt(r.B)} × ${num('naSupportIncomeRate')}%) → ${r.capable?'부양능력 있음(제외)':'부양능력 없음(충족)'}<br>`;
@@ -1695,7 +1761,7 @@ function fillSample(){
   document.getElementById('dutyEnable').checked = true;
   document.getElementById('dutyHhElderlyDisabled').checked = false;
   document.getElementById('dutyVulnerable').checked = true;
-  addDutyRow('장남', 3, 'other');
+  addDutyRow('장남', 3, 'other', 'child');
   document.getElementById('dIncome_'+dutyRowId).value = 6000000;
   document.getElementById('dAnnualIncome_'+dutyRowId).value = 60000000;
   document.getElementById('dHousing_'+dutyRowId).value = 180000000;
